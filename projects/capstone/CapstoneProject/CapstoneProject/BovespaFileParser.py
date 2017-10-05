@@ -9,8 +9,9 @@ import sys
 import time
 import os 
 import ntpath
+import argparse
 
-class Bovespa:
+class BovespaFileParser:
     def __init__(self):
         self.filename = ""
         self.fileData = []
@@ -35,8 +36,8 @@ class Bovespa:
     def ReadFolders(self,inputFolder,outputFolder):
         textFiles = [os.path.join(root, name)
              for root, dirs, files in os.walk(inputFolder)
-             for name in files
-             if name.lower().endswith((".txt"))]
+                for name in files
+                    if name.lower().endswith((".txt"))]
         total = len(textFiles)
         count = 1
         for textFile in textFiles:
@@ -108,7 +109,6 @@ class Bovespa:
 
         print "Writing File...\n"
         tableSize = int(len(table))
-        #time.sleep(0.1)
         self.progress(0,tableSize,"Writing File")
         newFile = open(outputFile,'w')  
         count = 0
@@ -124,8 +124,21 @@ class Bovespa:
         
         
 def main():
-    bovespa = Bovespa()
-    content = bovespa.ReadFolders("C:\Users\Augus\Desktop\Bovespateste","C:\Users\Augus\Desktop\Bovespa\csv")
+    parser=argparse.ArgumentParser()
+
+    parser.add_argument('--inputfolder', help='Folder that contains all Bovespa Files.')
+    parser.add_argument('--outputfolder', help='Folder that all parsed files will be placed.')
+
+    args=parser.parse_args()
+    if(args.inputfolder == None):
+        print "Please specify a valid input folder."
+        return
+    if(args.outputfolder == None):
+        print "Please specify a valid output folder."
+        return
+
+    bovespa = BovespaFileParser()
+    bovespa.ReadFolders(args.inputfolder,args.outputfolder)
     
         
 
