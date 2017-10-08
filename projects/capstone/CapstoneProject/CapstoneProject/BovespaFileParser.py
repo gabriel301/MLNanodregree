@@ -63,8 +63,8 @@ class BovespaFileParser:
         header = [line[int(headerchunks[i][0]):int(headerchunks[i][1])] for i in xrange(0,len(headerchunks),1)]
         header[3] = re.sub(r'([0-9]{4})([0-9]{2})([0-9]{2})',r'\1-\2-\3',header[3])
         header = [','.join(header)]
-        columnNames = ['TYPE OF REGISTER','DATE OF EXCHANGE','BDI CODE',' PAPER NEGOTIATION CODE','TYPE OF MARKET',
-                       'ABBREVIATED NAME OF THE COMPANY',' PAPER SPECIFICATION','FORWARD MARKET TERM IN DAYS',
+        columnNames = ['TYPE OF REGISTER','DATE OF EXCHANGE','BDI CODE','PAPER NEGOTIATION CODE','TYPE OF MARKET',
+                       'ABBREVIATED NAME OF THE COMPANY','PAPER SPECIFICATION','FORWARD MARKET TERM IN DAYS',
                        'REFERENCE CURRENCY','MARKET PAPER OPENING FLOOR PRICE','MARKET PAPER HIGHEST FLOOR PRICE',
                        'MARKET PAPER LOWEST FLOOR PRICE', 'MARKET PAPER AVERAGE FLOOR PRICE','MARKET PAPER LAST NEGOTIATED PRICE',
                        'MARKET PAPER BEST PURCHASE OFFER PRICE','MARKET PAPER BEST SALES OFFER PRICE','NUMBER OF TRADES CONDUCTED WITH THE MARKET PAPER',
