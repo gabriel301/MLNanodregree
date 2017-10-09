@@ -7,53 +7,39 @@ import csv
 import time
 
 def ReadSymbols(filename):
-    df = pd.read_csv(filename,header=None)
+    df = pd.read_csv(filename)
     listSymbols = df.values.T.tolist()
     return listSymbols[0]
 
-def GetSectors(stockSymbols,filename,outputfolder):
-    symbolsInfo = []
-    notFoundInfo = []
-    header = ['SYMBOL','SECTOR','INDUSTRY']
-    symbolsInfo.append(header)
+def GetDataFromAlphaVantage(stockSymbols,outputfolder):
     total = len(stockSymbols)
     count=1
+    apiKey = "2LZWQ360LNACRFVZ"
+    outputPath = os.path.join(outputfolder,"Data")
+    
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+    outputPath = os.path.join(outputPath,"AlphaVantage")
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+
     for symbol in stockSymbols:
         print "Getting data for Symbol {} ({} of {})".format(symbol,str(count),str(total))
         symbolKey = str(symbol) + ".SA"
-        #time.sleep(5)
-        url = "https://finance.yahoo.com/quote/{}/profile?p={}".format(symbolKey,symbolKey)
-        f = urllib.urlopen(url)
-        htmlPage = f.read()
-        sector = re.search("\"sector\":\"(.*?)\"",htmlPage)
-        industry = re.search("\"industry\":\"(.*?)\"",htmlPage)
-        if(sector is not None and industry is not None):
-            symbolsInfo.append([symbol,unicode(sector.group(1), "utf-8"),unicode(industry.group(1), "utf-8")])
+        url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={}&outputsize=full&apikey={}&datatype=csv".format(symbolKey,apiKey)
+        response = urllib.urlopen(url)
+        if(response.headers.type == "application/x-download"):
+            file = response.read()
+            outputfileName= symbol+".csv"
+            outputFile = os.path.join(outputPath,outputfileName)
+            print "Writing Info File...\n"
+            f = open(outputFile, "wb")
+            f.write(file)
+            #writer.writerows(file)
+            print "File created at {}\n".format(outputPath)
         else:
-            print "Information not found for symbol {}".format(symbol)
-            symbolsInfo.append([symbol,"",""])
-            #notFoundInfo.append(symbol)
-        count = count + 1
-        #if(count%10==0):
-            #print "Waiting 10 seconds before continue..."
-            #time.sleep(20)
-
-    outputfileName= str(ntpath.basename(filename)).lower().replace(".csv","_sectors.csv")
-    outputPath = os.path.join(outputfolder,outputfileName)
-    print "Writing Info File...\n"
-    f = open(outputPath, "wb")
-    writer = csv.writer(f)
-    writer.writerows(symbolsInfo)
-    print "File created at {}\n".format(outputPath)
-
-    #outputfileName= str(ntpath.basename(filename)).lower().replace(".csv","_sectors_notfound.csv")
-    #outputPath = os.path.join(outputfolder,outputfileName)
-    #print "Writing Not Found Info File...\n"
-    #f = open(outputPath, "wb")
-    #writer = csv.writer(f)
-    #writer.writerows(notFoundInfo)
-    #print "File created at {}\n".format(outputPath)
-
+            print "Information not found for symbol {}\n".format(symbol)
+        count = count +1
 def GetHistoricalDataFromAlpha(stocks,outputfolder):
     return
 
@@ -76,7 +62,11 @@ def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
         df['PAPER SPECIFICATION'] = df['PAPER SPECIFICATION'].apply(lambda x: re.sub('.*'+spec+'.*',spec,x))
 
     outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_filtered.csv")
-    outputPath = os.path.join(outputfolder,outputfileName)
+    outputPath = os.path.join(outputfolder,"Filtered")
+    outputPath = os.path.join(outputPath,outputfileName)
+    if not os.path.exists(os.path.dirname(outputPath)):
+        os.makedirs(os.path.dirname(outputPath))
+
     print "Writing filtered file"
     df.to_csv(outputPath,index=False)
     print "File created at {}\n".format(outputPath)
@@ -86,8 +76,13 @@ def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
     df2 = df[['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']]
     df2 = df2.groupby(['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']).size().reset_index()
     df2.drop(df2.columns[2],axis=1,inplace=True)
+    outputPath = os.path.join(outputfolder,"Symbols")
     outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_symbols.csv")
-    outputPath = os.path.join(outputfolder,outputfileName)
+    outputPath = os.path.join(outputPath,outputfileName)
+    if not os.path.exists(os.path.dirname(outputPath)):
+        os.makedirs(os.path.dirname(outputPath))
+    
+    
     print "Writing file...\n"
     df2.to_csv(outputPath,index=False)
     print "File created at {}\n".format(outputPath)
@@ -95,10 +90,10 @@ def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
   
 def main():
     input = "C:\\Users\\Augus\\Desktop\\Bovespa\\csv\\cotahist_a2017.csv"
-    output = "C:\\Users\\Augus\\Desktop"
+    output = "C:\\Users\\Augus\\Desktop\\Bovespa"
     symbolsOutputFile = GetCompaniesSymbolsFromBovespa(input,output)
-    #symbols = ReadSymbols(symbolsOutputFile)
-    #GetSectors(symbols,input,output)
+    symbols = ReadSymbols(symbolsOutputFile)
+    GetDataFromAlphaVantage(symbols,output)
 
 
 if  __name__ =='__main__': main() 
