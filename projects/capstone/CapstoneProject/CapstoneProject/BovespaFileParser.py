@@ -40,16 +40,19 @@ class BovespaFileParser:
                     if name.lower().endswith((".txt"))]
         total = len(textFiles)
         count = 1
+        self.CreateFolder(outputFolder)
+        outputPath = os.path.join(outputfolder,"Parsed")
+        self.CreateFolder(outputPath)
         for textFile in textFiles:
             sys.stdout.write("File %s of %s\n" % (str(count),str(total)))
             sys.stdout.write("Current File: %s\n"% (textFile))
             #self.filename = textFile
-            self.ReadFile(textFile,outputFolder)
+            self.ParseFile(textFile,outputPath)
             count = count+1
             sys.stdout.flush() 
 
 
-    def ReadFile(self,filename,outputFolder):
+    def ParseFile(self,filename,outputFolder):
         self.fileData = open(filename,'r').readlines()
         self.filename = str(ntpath.basename(filename)).lower().replace(".txt",".csv")
         outputFile = os.path.join(outputFolder,self.filename)
@@ -120,7 +123,9 @@ class BovespaFileParser:
          count = count+1
         newFile.close()
 
-        
+    def CreateFolder(path):
+        if not os.path.exists(path):
+            os.makedirs(path)       
         
         
 def main():

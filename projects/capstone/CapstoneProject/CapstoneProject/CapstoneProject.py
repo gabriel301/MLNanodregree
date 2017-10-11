@@ -17,14 +17,13 @@ def ReadSymbols(filename):
 def GetDataFromAlphaVantage(stockSymbols,outputfolder):
     total = len(stockSymbols)
     count=1
-    apiKey = ""
+    apiKey = "2LZWQ360LNACRFVZ"
+    CreateFolder(outputfolder)
     outputPath = os.path.join(outputfolder,"Data")
-    notFoundSymbols = []
-    if not os.path.exists(outputPath):
-        os.makedirs(outputPath)
+    CreateFolder(outputPath)
     outputPath = os.path.join(outputPath,"AlphaVantage")
-    if not os.path.exists(outputPath):
-        os.makedirs(outputPath)
+    CreateFolder(outputPath)
+    notFoundSymbols = []
 
     for symbol in stockSymbols:
         print "Getting data for Symbol {} ({} of {}) from AlphaVantage".format(symbol,str(count),str(total))
@@ -61,13 +60,14 @@ def GetDataFromAlphaVantage(stockSymbols,outputfolder):
 def GetDataFromYahoo(stockSymbols,outputfolder):
     total = len(stockSymbols)
     count=1
+
+    CreateFolder(outputfolder)
     outputPath = os.path.join(outputfolder,"Data")
-    notFoundSymbols = []
-    if not os.path.exists(outputPath):
-        os.makedirs(outputPath)
+    CreateFolder(outputPath)
     outputPath = os.path.join(outputPath,"Yahoo")
-    if not os.path.exists(outputPath):
-        os.makedirs(outputPath)
+    CreateFolder(outputPath)
+    
+    notFoundSymbols = []
     attemps = 1
     for symbol in stockSymbols:
         while(attemps <= 3):
@@ -117,6 +117,11 @@ def CallYahooPage(symbol):
     download = s.get(urlD,headers = header)
 
     return download
+
+def CreateFolder(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
     print "Reading file {}...\n".format(fileName)
     #Read the file
@@ -136,10 +141,10 @@ def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
         df['PAPER SPECIFICATION'] = df['PAPER SPECIFICATION'].apply(lambda x: re.sub('.*'+spec+'.*',spec,x))
 
     outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_filtered.csv")
+    CreateFolder(outputfolder)
     outputPath = os.path.join(outputfolder,"Filtered")
+    CreateFolder(outputPath)
     outputPath = os.path.join(outputPath,outputfileName)
-    if not os.path.exists(os.path.dirname(outputPath)):
-        os.makedirs(os.path.dirname(outputPath))
 
     print "Writing filtered file"
     df.to_csv(outputPath,index=False)
@@ -151,11 +156,9 @@ def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
     df2 = df2.groupby(['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']).size().reset_index()
     df2.drop(df2.columns[2],axis=1,inplace=True)
     outputPath = os.path.join(outputfolder,"Symbols")
+    CreateFolder(outputPath)
     outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_symbols.csv")
     outputPath = os.path.join(outputPath,outputfileName)
-    if not os.path.exists(os.path.dirname(outputPath)):
-        os.makedirs(os.path.dirname(outputPath))
-    
     
     print "Writing file...\n"
     df2.to_csv(outputPath,index=False)
