@@ -10,14 +10,13 @@ import time
 import os 
 import ntpath
 import argparse
+import pandas as pd
 
 class BovespaFileParser:
     def __init__(self):
         self.filename = ""
         self.fileData = []
-
-
-    
+   
     def progress(self,count, total, status=''):
         self.count = count
         self.total = total
@@ -33,26 +32,25 @@ class BovespaFileParser:
         if self.count == self.total:
             print"\n"
 
-    def ReadFolders(self,inputFolder,outputFolder):
-        textFiles = [os.path.join(root, name)
-             for root, dirs, files in os.walk(inputFolder)
-                for name in files
-                    if name.lower().endswith((".txt"))]
+    def ParseFolder(self,inputFolder,outputFolder):
+        textFiles = self.GetFilesFromFolder(inputFolder,"txt")
+
         total = len(textFiles)
         count = 1
         self.CreateFolder(outputFolder)
-        outputPath = os.path.join(outputfolder,"Parsed")
+        outputPath = os.path.join(outputFolder,"Parsed")
         self.CreateFolder(outputPath)
+
         for textFile in textFiles:
-            sys.stdout.write("File %s of %s\n" % (str(count),str(total)))
-            sys.stdout.write("Current File: %s\n"% (textFile))
-            #self.filename = textFile
+            sys.stdout.write("Parsing File %s of %s\n" % (str(count),str(total)))
+            
             self.ParseFile(textFile,outputPath)
             count = count+1
-            sys.stdout.flush() 
-
+          
+        return outputPath
 
     def ParseFile(self,filename,outputFolder):
+        sys.stdout.write("Parsing File: %s\n"% (filename))
         self.fileData = open(filename,'r').readlines()
         self.filename = str(ntpath.basename(filename)).lower().replace(".txt",".csv")
         outputFile = os.path.join(outputFolder,self.filename)
@@ -77,7 +75,7 @@ class BovespaFileParser:
                        'PAPER CODE IN THE IS IN SYSTEM OR PAPER INTERNAL CODE','PAPER DISTRIBUTION NUMBER']
         columnNames = [','.join(columnNames)]
         table = []     
-        table.append(header)
+        #table.append(header)
         table.append(columnNames)
         print "Reading File...\n"
         fileSize = int(len(self.fileData))
@@ -106,7 +104,7 @@ class BovespaFileParser:
         trailer = [line[int(trailerchunks[i][0]):int(trailerchunks[i][1])] for i in xrange(0,len(trailerchunks),1)]
         trailer[3] = re.sub(r'([0-9]{4})([0-9]{2})([0-9]{2})',r'\1-\2-\3',trailer[3])
         trailer = [','.join(trailer)]
-        table.append(trailer)
+        #table.append(trailer)
  
         self.progress(fileSize,fileSize,"Reading File")
 
@@ -116,18 +114,99 @@ class BovespaFileParser:
         newFile = open(outputFile,'w')  
         count = 0
         for x in xrange(0,len(table),1):
-         newFile.writelines(table[x])
-         newFile.write("\n")
-         #time.sleep(0.1)
-         self.progress(count+1,tableSize,"Writing File")
-         count = count+1
+            newFile.writelines(table[x])
+            newFile.write("\n")
+            self.progress(count+1,tableSize,"Writing File")
+            count = count+1
         newFile.close()
+        sys.stdout.flush() 
+        return outputFile
 
-    def CreateFolder(path):
+    def CreateFolder(self,path):
         if not os.path.exists(path):
             os.makedirs(path)       
         
+    
+    def FilterSymbolsByStockType(self,inputfolder,outputfolder):
+
+        files = self.GetFilesFromFolder(inputfolder,"csv")
+
+        self.CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Filtered")
+        self.CreateFolder(outputPath)
+        outputfolder = outputPath
+        totalFiles = len(files)
+        cont = 1
+        for fileName in files:
+            print "Filtering file {} of {}".format(cont,totalFiles)
+            print "Reading file {}...\n".format(fileName)
+            #Read the file
+            df = pd.read_csv(fileName)
+
+            print "Filtering Data...\n"
+            #Filters only stock prices of interest
+            df = df[(df['BDI CODE'] == 2) & (df['TYPE OF MARKET']==10)]
+
+            #Filters only papers of interest
+            specList = ['ON','PN','DRN']
+            pattern = '|'.join(specList)
+            df = df[df['PAPER SPECIFICATION'].str.contains(pattern)]
+
+            #Replaces all paper types for simpler ones
+            for spec in specList:
+                df['PAPER SPECIFICATION'] = df['PAPER SPECIFICATION'].apply(lambda x: re.sub('.*'+spec+'.*',spec,x))
+
+            outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_filtered.csv")
+            
+            outputPath = os.path.join(outputfolder,outputfileName)
+
+            print "Writing filtered file"
+            df.to_csv(outputPath,index=False)
+            print "File created at {}\n".format(outputPath)
+            cont = cont +1
+        return outputfolder
+
+    def GetSymbolsAndStockType(self,inputfolder,outputfolder):
         
+        self.CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Symbols")
+        self.CreateFolder(outputPath)
+        outputfolder = outputPath
+        files = self.GetFilesFromFolder(inputfolder,"csv")
+        totalFiles = len(files)
+        cont = 1
+        for fileName in files:
+            print "Getting Symbols and Stock Types from file {} of {}".format(cont,totalFiles)
+            print "Reading file {}...\n".format(fileName)
+            df = pd.read_csv(fileName)
+            print "Getting Symbols...\n"
+            #Get all stock symbols and write into a file
+            df2 = df[['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']]
+            df2 = df2.groupby(['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']).size().reset_index()
+            df2.drop(df2.columns[2],axis=1,inplace=True)
+        
+            outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_symbols.csv")
+            outputPath = os.path.join(outputfolder,outputfileName)
+    
+            print "Writing file...\n"
+            df2.to_csv(outputPath,index=False)
+            print "File created at {}\n".format(outputPath)
+            cont = cont+1
+        return outputfolder
+
+    def GetFilesFromFolder(self,folder,fileExtension):
+
+        fileExtension = fileExtension if fileExtension.find('.') == 0 else "." + fileExtension
+        fileExtension = fileExtension.lower()
+        print "Getting {} files from {}".format(fileExtension,folder)
+        files = [os.path.join(root, name)
+             for root, dirs, files in os.walk(folder)
+                for name in files
+                    if name.lower().endswith(fileExtension)]
+
+        print "{} files found".format(len(files))
+        return files
+
 def main():
     parser=argparse.ArgumentParser()
 
@@ -135,6 +214,7 @@ def main():
     parser.add_argument('--outputfolder', help='Folder that all parsed files will be placed.')
 
     args=parser.parse_args()
+    
     if(args.inputfolder == None):
         print "Please specify a valid input folder."
         return
@@ -143,8 +223,10 @@ def main():
         return
 
     bovespa = BovespaFileParser()
-    bovespa.ReadFolders(args.inputfolder,args.outputfolder)
-    
+
+    parsedFolder = bovespa.ParseFolder(args.inputfolder,args.outputfolder)
+    filteredFolder =  bovespa.FilterSymbolsByStockType(parsedFolder,args.outputfolder)
+    symbolsFolder = bovespa.GetSymbolsAndStockType(filteredFolder,args.outputfolder)
         
 
 
