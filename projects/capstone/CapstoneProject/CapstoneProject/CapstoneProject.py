@@ -9,15 +9,12 @@ import io
 import requests
 import datetime
 
-def ReadSymbols(filename):
-    df = pd.read_csv(filename)
-    listSymbols = df.values.T.tolist()
-    return listSymbols[0]
+
 
 def GetDataFromAlphaVantage(stockSymbols,outputfolder):
     total = len(stockSymbols)
     count=1
-    apiKey = "2LZWQ360LNACRFVZ"
+    apiKey = ""
     CreateFolder(outputfolder)
     outputPath = os.path.join(outputfolder,"Data")
     CreateFolder(outputPath)
@@ -122,48 +119,10 @@ def CreateFolder(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def GetCompaniesSymbolsFromBovespa(fileName,outputfolder):
-    print "Reading file {}...\n".format(fileName)
-    #Read the file
-    df = pd.read_csv(fileName)
-
-    print "Filtering Data...\n"
-    #Filters only stock prices of interest
-    df = df[(df['BDI CODE'] == 2) & (df['TYPE OF MARKET']==10)]
-
-    #Filters only papers of interest
-    specList = ['ON','PN','DRN']
-    pattern = '|'.join(specList)
-    df = df[df['PAPER SPECIFICATION'].str.contains(pattern)]
-
-    #Replaces all paper types for simpler ones
-    for spec in specList:
-        df['PAPER SPECIFICATION'] = df['PAPER SPECIFICATION'].apply(lambda x: re.sub('.*'+spec+'.*',spec,x))
-
-    outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_filtered.csv")
-    CreateFolder(outputfolder)
-    outputPath = os.path.join(outputfolder,"Filtered")
-    CreateFolder(outputPath)
-    outputPath = os.path.join(outputPath,outputfileName)
-
-    print "Writing filtered file"
-    df.to_csv(outputPath,index=False)
-    print "File created at {}\n".format(outputPath)
-
-    print "Getting Symbols...\n"
-    #Get all stock symbols and write into a file
-    df2 = df[['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']]
-    df2 = df2.groupby(['PAPER NEGOTIATION CODE','PAPER SPECIFICATION']).size().reset_index()
-    df2.drop(df2.columns[2],axis=1,inplace=True)
-    outputPath = os.path.join(outputfolder,"Symbols")
-    CreateFolder(outputPath)
-    outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_symbols.csv")
-    outputPath = os.path.join(outputPath,outputfileName)
-    
-    print "Writing file...\n"
-    df2.to_csv(outputPath,index=False)
-    print "File created at {}\n".format(outputPath)
-    return outputPath
+def ReadSymbols(filename):
+        df = pd.read_csv(filename)
+        listSymbols = df.values.T.tolist()
+        return listSymbols[0]
   
 def main():
     input = "C:\\Users\\Augus\\Desktop\\Bovespa\\csv\\cotahist_a2017.csv"
@@ -171,7 +130,7 @@ def main():
     symbolsOutputFile = GetCompaniesSymbolsFromBovespa(input,output)
     symbols = ReadSymbols(symbolsOutputFile)
     GetDataFromYahoo(symbols,output)
-    GetDataFromAlphaVantage(symbols,output)
+    #GetDataFromAlphaVantage(symbols,output)
 
 
 if  __name__ =='__main__': main() 

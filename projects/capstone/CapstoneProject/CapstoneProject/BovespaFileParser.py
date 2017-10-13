@@ -262,15 +262,23 @@ class BovespaFileParser:
 
 
 def main():
-    parser=argparse.ArgumentParser()
+    
+    epilog = "Sample Usage: inputFolder outputFolder"
+    parser = argparse.ArgumentParser(description='Parses, Filters and Get Stock Symbols from Bovespa Text Files to CSV Files',
+                                     epilog=epilog, add_help=True)
 
-    parser.add_argument('--inputfolder', help='Folder that contains all Bovespa Files.')
-    parser.add_argument('--outputfolder', help='Folder that all parsed files will be placed.')
-
+    parser.add_argument('inputfolder', help='Folder that contains all Bovespa Text Files to be parsed.')
+    parser.add_argument('outputfolder', help='Folder that all parsed files will be placed.')
+    parser.add_argument('-m','--merge', help='Parsed files from diferent sources should be merged into a single file. Default Value is false',action="store_true")
+    parser.add_argument('-i','--includeinfo', 
+                        help='When getting symbols, include company information from the file specified in this parameter'
+                        ,const=None,
+                        default=None,
+                        action='store',
+                        nargs='?')
     args=parser.parse_args()
-    args.inputfolder = "C:\\Users\\Augus\\Desktop\\BovespaTeste\\txt"
-    args.outputfolder = "C:\\Users\\Augus\\Desktop\\BVSP"
-    args.merge = True
+   # args.inputfolder = "C:\\Users\\Augus\\Desktop\\BovespaTeste\\txt"
+    #args.outputfolder = "C:\\Users\\Augus\\Desktop\\BVSP"
 
     if(args.inputfolder == None):
         print "Please specify a valid input folder."
@@ -278,8 +286,7 @@ def main():
     if(args.outputfolder == None):
         print "Please specify a valid output folder."
         return
-    if(args.merge == None):
-        args.merge = False
+
 
     bovespa = BovespaFileParser()
     outputFolders = []
