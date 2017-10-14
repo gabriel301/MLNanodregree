@@ -22,7 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CapstoneProject.py" />
+    <Compile Include="StockHistoricalData.py" />
     <Compile Include="BovespaFileParser.py" />
   </ItemGroup>
   <ItemGroup>
