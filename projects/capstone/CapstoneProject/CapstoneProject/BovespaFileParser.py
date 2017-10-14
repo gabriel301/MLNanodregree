@@ -223,7 +223,7 @@ class BovespaFileParser:
         print "{} files found".format(len(files))
         return files
 
-    def MergeFiles(self,inputfolder,outputFolder,outputfilename,removeTempFiles):
+    def MergeFiles(self,inputfolder,outputFolder,outputfilename,tempFiles):
             files = self.GetFilesFromFolder(inputfolder,"csv")
             self.CreateFolder(outputFolder)  
             outputFile = os.path.join(outputFolder,outputfilename)
@@ -252,13 +252,82 @@ class BovespaFileParser:
                     self.progress(count+1,tableSize,"Writing File")
                     count = count+1
                 countFile = countFile + 1
-            if(removeTempFiles):
+            if(tempFiles != True):
                 try:
                     if(os.path.exists(inputfolder)):
                         shutil.rmtree(inputfolder)
                 except:
                     print "Could not delete temp folder at {}".format(inputfolder)
 
+    def MergeSymbolFiles(self,inputfolder,outputFolder,outputfilename,tempFiles):
+        listSymbols = []
+        files = self.GetFilesFromFolder(inputfolder,"csv")
+        self.CreateFolder(outputFolder)  
+        outputFile = os.path.join(outputFolder,outputfilename)
+        if(os.path.exists(outputFile)):
+            try:
+                os.remove(outputFile)
+            except:
+                print "The existing file {} could not be deleted. Hence, all new content will be appended to this file".format(outputFile)
+        total = len(files)
+        countFile = 1
+        print "Merging files at {}...\n".format(inputfolder)
+        for file in files:
+            print "Merging file {} ({} of {})".format(file,countFile,total)
+            table = open(file,'r').readlines()
+            table = filter(None, (line.rstrip('\n') for line in table))
+            if(len(listSymbols)==0):
+                listSymbols = table 
+            else:
+                diff = list(set(table) - set(listSymbols))
+                table = diff
+                listSymbols.append(table)
+
+            newFile = open(outputFile,'a')
+            tableSize = int(len(table))
+            self.progress(0,tableSize,"Writing File")                  
+            count = 0
+            for x in xrange(0,len(table),1):
+                newFile.writelines(table[x])
+                newFile.write("\n")
+                self.progress(count+1,tableSize,"Writing File")
+                count = count+1
+            countFile = countFile + 1
+        if(tempFiles != True):
+            try:
+                if(os.path.exists(inputfolder)):
+                    shutil.rmtree(inputfolder)
+            except:
+                print "Could not delete temp folder at {}".format(inputfolder)
+
+    def IncludeCompanyInfo(self,inputFolder,InfoFile,outputFolder,merge):
+        files = self.GetFilesFromFolder(inputFolder,"csv")
+        self.CreateFolder(outputFolder)
+        outputPath = os.path.join(outputFolder,"Info")
+        self.CreateFolder(outputPath)
+        if(merge == True):
+            outputPath = os.path.join(outputPath,"Temp")
+            self.CreateFolder(outputPath) 
+        
+        total = len(files)
+        countFile = 1
+        print "Merging files at {}... with file {}\n".format(inputFolder,InfoFile)
+        for symbolFile in files:
+            print "Reading symbols file {}...".format(symbolFile)
+            dfSymbols= pd.read_csv(symbolFile)
+            dfSymbols['CODE'] = dfSymbols['PAPER NEGOTIATION CODE'].str[:4]
+            print "Reading info file {}...".format(InfoFile)
+            dfInfo = pd.read_csv(InfoFile,delimiter = ';')
+            print "Merging Files..."
+            dfResult = pd.merge(dfSymbols, dfInfo, on='CODE', how='inner')
+            dfResult.drop(dfResult.columns[2],axis=1,inplace=True)
+            print "Writing Merged File..."
+            outputfileName = str(ntpath.basename(symbolFile)).lower().replace(".csv","_info.csv")
+            outputfileName = os.path.join(outputPath,outputfileName)
+            dfResult.to_csv(outputfileName,index=False)
+            print "File created at {}".format(outputfileName)
+
+        return outputPath
 
 
 def main():
@@ -269,38 +338,43 @@ def main():
 
     parser.add_argument('inputfolder', help='Folder that contains all Bovespa Text Files to be parsed.')
     parser.add_argument('outputfolder', help='Folder that all parsed files will be placed.')
-    parser.add_argument('-m','--merge', help='Parsed files from diferent sources should be merged into a single file. Default Value is false',action="store_true")
-    parser.add_argument('-i','--includeinfo', 
-                        help='When getting symbols, include company information from the file specified in this parameter'
+    parser.add_argument('-m','--merge', help='Parsed files should be merged into a single file.',action="store_true")
+    parser.add_argument('-t','--tempfiles', help='If merge is set, do not remove temp files generated after merging.',action="store_true")
+    parser.add_argument('-i','--infofile', 
+                        help='When getting symbols, include company information from the specified file in this parameter'
                         ,const=None,
                         default=None,
                         action='store',
                         nargs='?')
     args=parser.parse_args()
-   # args.inputfolder = "C:\\Users\\Augus\\Desktop\\BovespaTeste\\txt"
-    #args.outputfolder = "C:\\Users\\Augus\\Desktop\\BVSP"
-
-    if(args.inputfolder == None):
-        print "Please specify a valid input folder."
+   
+    if not os.path.exists(args.inputfolder):
+        print "Input Folder does not exist."
         return
-    if(args.outputfolder == None):
-        print "Please specify a valid output folder."
-        return
-
-
+   
     bovespa = BovespaFileParser()
     outputFolders = []
+    symbolFolders = []
     folder = bovespa.ParseFolder(args.inputfolder,args.outputfolder,args.merge)
     outputFolders.append(folder)
     folder =  bovespa.FilterSymbolsByStockType(folder,args.outputfolder,args.merge)
     outputFolders.append(folder)
     folder = bovespa.GetSymbolsAndStockType(folder,args.outputfolder,args.merge)
-    outputFolders.append(folder)
+    symbolFolders.append(folder)
+
+    if(args.infofile):
+        folder = bovespa.IncludeCompanyInfo(folder,args.infofile,args.outputfolder,args.merge)
+        symbolFolders.append(folder)
 
     if(args.merge):
         for folder in outputFolders:
             outfolder = os.path.abspath(os.path.join(folder, os.pardir))
             filename = os.path.basename(outfolder) + "_Merged.csv"
-            bovespa.MergeFiles(folder,outfolder,filename,True)
+            bovespa.MergeFiles(folder,outfolder,filename,args.tempfiles)
+        for folder in symbolFolders:
+            outfolder = os.path.abspath(os.path.join(folder, os.pardir))
+            filename = os.path.basename(outfolder) + "_Merged.csv"
+            bovespa.MergeSymbolFiles(folder,outfolder,filename,args.tempfiles)
 
+    print "Done!"
 if  __name__ =='__main__': main()    
