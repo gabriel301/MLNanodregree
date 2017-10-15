@@ -14,6 +14,57 @@ import math
 
 class StockHistoricalData:
 
+    def GetSectorInformationFromYahoo(self,stockSymbols,outputfolder,identifier,replace):
+        self.CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Info")
+        self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Sectors")
+        self.CreateFolder(outputPath)
+        outputFile = os.path.join(outputPath,"SectorData.csv")
+        if not replace:
+                if(os.path.exists(outputFile)):
+                    print "Skipping file {} because a file already exists".format(outputFile)
+                    return outputPath
+        
+        symbolsInfo = []
+        header = ['CODE','COMPANY','SECTOR','INDUSTRY']
+        #symbolsInfo.append(header)
+        total = len(stockSymbols)
+        count=1
+        attemps = 1
+        if(identifier):
+            identifier = str(identifier) if str(identifier).find('.') == 0 else "." + str(identifier)
+            identifier = identifier.upper()
+
+        for symbol in stockSymbols:           
+            while(attemps <= 3):
+                print "Getting Sector Data for Symbol {} ({} of {}). Attempt {} of 3".format(symbol,str(count),str(total),str(attemps))
+                symbolKey = str(symbol) + ".SA"
+                url = "https://finance.yahoo.com/quote/{}/profile?p={}".format(symbolKey,symbolKey)
+                f = urllib.urlopen(url)
+                htmlPage = f.read()
+                sector = re.search("\"sector\":\"(.*?)\"",htmlPage)
+                industry = re.search("\"industry\":\"(.*?)\"",htmlPage)
+                name = re.search("\"longName\":\"(.*?)\"",htmlPage)
+                if(sector is not None and industry is not None):
+                    symbolsInfo.append([symbol,unicode(name.group(1), "utf-8"),unicode(sector.group(1), "utf-8"),unicode(industry.group(1), "utf-8")])
+                    break;
+                elif (attemps < 3):
+                    print "Could not get information for symbol {}. Trying again.".format(symbol)
+                    attemps = attemps +1
+                else:
+                    print "Could not get information for symbol {}".format(symbol)
+                    symbolsInfo.append([symbol,"","",""])
+                    break
+            count = count + 1
+            attemps = 1
+        
+        print "Writing Info File...\n"
+        df = pd.DataFrame(symbolsInfo, columns=header)
+        df.to_csv(outputFile,index=False)
+        print "File created at {}\n".format(outputPath)
+        return outputPath
+    
     def GetHistoricalDataFromAlphaVantage(self,stockSymbols,outputfolder,identifier,replace):
         total = len(stockSymbols)
         count=1
@@ -26,12 +77,11 @@ class StockHistoricalData:
         outputPath = os.path.join(outputPath,"AlphaVantage")
         self.CreateFolder(outputPath)
         notFoundSymbols = []
-
-        for symbol in stockSymbols:
-            if(identifier):
+        if(identifier):
                 identifier = str(identifier) if str(identifier).find('.') == 0 else "." + str(identifier)
                 identifier = identifier.upper()
 
+        for symbol in stockSymbols:            
             symbolKey = str(symbol) + str(identifier).upper()
             outputfileName= symbolKey+".csv"
             outputFile = os.path.join(outputPath,outputfileName)
@@ -90,14 +140,14 @@ class StockHistoricalData:
 
         symbols = [str(symbol) + str(identifier).upper() for symbol in symbols]
         symbolQuery = [','.join(symbols)]
-        url = "http://finance.yahoo.com/d/quotes.csv?s={}&f=ss6j1ej4".format(symbolQuery)
+        url = "http://finance.yahoo.com/d/quotes.csv?s={}&f=sns6j1ej4".format(symbolQuery)
         header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         s = requests.session()
         print "Getting Financial Data..."
         download = s.get(url,headers = header)
         decoded_content = download.content.decode("utf-8")
         df = pd.read_csv(io.StringIO(decoded_content))
-        df.columns = ['CODE','REVENUE','MARKET CAP','EPS','EBITDA']
+        df.columns = ['CODE','COMPANY NAME','REVENUE','MARKET CAP','EPS','EBITDA']
         if(identifier):
             df['CODE'] = df['CODE'].str[:-len(identifier)]
 
@@ -286,7 +336,7 @@ def main():
        enddate = datetime.datetime.strptime(args.enddate, "%Y-%m-%d")
     else:
         enddate = None
-
+    
     stocks = StockHistoricalData()
     folderSet = set()
     files = stocks.GetFilesFromFolder(args.inputfolder,"csv")
@@ -296,8 +346,10 @@ def main():
         folderSet.add(folder)
         folder = stocks.GetHistoricalDataFromAlphaVantage(symbols,args.outputfolder,args.identifier,args.replace)
         folderSet.add(folder)
+        sectorFolder = stocks.GetSectorInformationFromYahoo(symbols,args.outputfolder,args.identifier,args.replace)
+        financialFolder= stocks.GetFinancialDataFromYahoo(symbols,args.outputfolder,args.identifier,args.replace)
     
     datesInterval = stocks.GetDateInterval(list(folderSet),startdate,enddate)
-    print datesInterval
-
+    #print datesInterval
+    print "Done!"
 if  __name__ =='__main__': main() 
