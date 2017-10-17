@@ -11,11 +11,13 @@ import argparse
 import datetime
 from operator import itemgetter
 import math
-
+import numpy as np
 class StockHistoricalData:
 
     def GetSectorInformationFromYahoo(self,stockSymbols,outputfolder,identifier,replace):
         self.CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Download")
+        self.CreateFolder(outputPath)
         outputPath = os.path.join(outputfolder,"Info")
         self.CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Sectors")
@@ -41,8 +43,14 @@ class StockHistoricalData:
                 print "Getting Sector Data for Symbol {} ({} of {}). Attempt {} of 3".format(symbol,str(count),str(total),str(attemps))
                 symbolKey = str(symbol) + ".SA"
                 url = "https://finance.yahoo.com/quote/{}/profile?p={}".format(symbolKey,symbolKey)
-                f = urllib.urlopen(url)
-                htmlPage = f.read()
+                #f = urllib.urlopen(url)
+                #htmlPage = f.read()
+                s = requests.session()
+                try:
+                    htmlPage = s.get(url,timeout = 10).content
+                except:
+                    print "Could not get information for symbol {}. Trying again.".format(symbol)
+                    attemps = attemps +1
                 sector = re.search("\"sector\":\"(.*?)\"",htmlPage)
                 industry = re.search("\"industry\":\"(.*?)\"",htmlPage)
                 name = re.search("\"longName\":\"(.*?)\"",htmlPage)
@@ -61,7 +69,7 @@ class StockHistoricalData:
         
         print "Writing Info File...\n"
         df = pd.DataFrame(symbolsInfo, columns=header)
-        df.to_csv(outputFile,index=False)
+        df.to_csv(outputFile,index=False,encoding='utf-8')
         print "File created at {}\n".format(outputPath)
         return outputPath
     
@@ -70,7 +78,7 @@ class StockHistoricalData:
         count=1
         apiKey = "2LZWQ360LNACRFVZ"
         self.CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Data")
+        outputPath = os.path.join(outputfolder,"Download")
         self.CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Historical")
         self.CreateFolder(outputPath)
@@ -104,6 +112,7 @@ class StockHistoricalData:
                 df = df[cols]
                 df.columns = ['Date','Open','High','Low','Close','Adjusted_Close','Volume','a','b']
                 df.drop(axis=1,labels=['a','b'],inplace=True)
+                df.replace(0, np.nan,inplace=True)
                 print "Writing Info File...\n"
                 df.to_csv(outputFile,index=False)
                 #writer.writerows(file)
@@ -123,7 +132,7 @@ class StockHistoricalData:
 
     def GetFinancialDataFromYahoo (self,symbols,outputfolder,identifier,replace):
         self.CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Data")
+        outputPath = os.path.join(outputfolder,"Download")
         self.CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Financial")
         self.CreateFolder(outputPath)
@@ -162,7 +171,7 @@ class StockHistoricalData:
         count=1
 
         self.CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Data")
+        outputPath = os.path.join(outputfolder,"Download")
         self.CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Historical")
         self.CreateFolder(outputPath)
@@ -192,6 +201,7 @@ class StockHistoricalData:
                 if(download.status_code == 200):                       
                     decoded_content = download.content.decode("utf-8")
                     df = pd.read_csv(io.StringIO(decoded_content))
+                    df.replace('null', np.nan,inplace=True)
                     df.columns = ['Date','Open','High','Low','Close','Adjusted_Close','Volume']
                     print "Writing Info File...\n"
                     df.to_csv(outputFile,index=False)
@@ -267,13 +277,14 @@ class StockHistoricalData:
     def GetDateInterval(self, stocksFolder,startdate,enddate):
         datesSet = set()
         filesInfo = []
-        for folder in stocksFolder:
-            files = self.GetFilesFromFolder(folder,"csv")
-            if(len(filesInfo)==0):
-                filesInfo = self.GetFileSizes(files)
-            else:
-                filesInfo.extend(self.GetFileSizes(files))
-        
+        #for folder in stocksFolder:
+            #files = self.GetFilesFromFolder(folder,"csv")
+            #if(len(filesInfo)==0):
+                #filesInfo = self.GetFileSizes(files)
+            #else:
+                #filesInfo.extend(self.GetFileSizes(files))
+        files = self.GetFilesFromFolder(stocksFolder,"csv")
+        filesInfo = self.GetFileSizes(files)
         filesInfo = sorted(filesInfo,key=itemgetter(0),reverse = True)
         filesInfo = filesInfo[:5]
         for item in filesInfo:          
@@ -289,8 +300,35 @@ class StockHistoricalData:
             dt_dates = [date for date in dt_dates if date <= enddate]
         listDates = [datetime.datetime.strftime(date, "%Y-%m-%d") for date in dt_dates]
         listDates = sorted(listDates,key=lambda d: map(int, d.split('-')))
+        print "{} dates loaded.".format(len(listDates))
         return listDates
-  
+
+    def GetCleanDataframe(self,intervalDates,inputfolder,outputfolder):
+        self.CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Data")
+        self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Historical")
+        self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Quotes")
+        self.CreateFolder(outputPath)
+        dfDates = pd.DataFrame(intervalDates,columns = ['Date'])
+        files = self.GetFilesFromFolder(inputfolder,'csv')
+        total = len(files)
+        count = 1
+        for stockfile in files:           
+            dfHistorical = pd.read_csv(stockfile)
+            if 'Date' in dfHistorical.columns:
+                print "Clean data from file {} ({} of {})".format(stockfile,count,total)
+                dfCleaned = pd.merge(dfDates, dfHistorical, on='Date', how='left')
+                dfCleaned.fillna(method='ffill',inplace=True)
+                dfCleaned.fillna(method='bfill',inplace=True)
+                outputfileName = str(ntpath.basename(stockfile))
+                outputFile = os.path.join(outputPath,outputfileName)
+                dfCleaned.to_csv(outputFile,index=False)
+                count = count + 1
+                print "File created at {}".format(outputFile)
+        return outputPath
+
 def main():
     
     epilog = "Sample Usage: inputFolder outputFolder"
@@ -319,6 +357,13 @@ def main():
                         default=None,
                         action='store',
                         nargs='?')
+
+    parser.add_argument('-d','--datasource', 
+                        help='Source from data to historical data to download. Letter y for Yahoo Finance, a for Alphavantage (default)'
+                        ,const='a',
+                        default='a',
+                        action='store',
+                        nargs='?')
     args=parser.parse_args()
 
     if not os.path.exists(args.inputfolder):
@@ -338,18 +383,18 @@ def main():
         enddate = None
     
     stocks = StockHistoricalData()
-    folderSet = set()
     files = stocks.GetFilesFromFolder(args.inputfolder,"csv")
     for symbolFile in files:
         symbols = stocks.ReadSymbols(symbolFile)
-        folder = stocks.GetHistoricalDataFromYahoo(symbols,args.outputfolder,args.identifier,args.replace)
-        folderSet.add(folder)
-        folder = stocks.GetHistoricalDataFromAlphaVantage(symbols,args.outputfolder,args.identifier,args.replace)
-        folderSet.add(folder)
+        if(args.datasource.lower() == 'y' ):
+            folderHistorical = stocks.GetHistoricalDataFromYahoo(symbols,args.outputfolder,args.identifier,args.replace)
+        else:
+            folderHistorical = stocks.GetHistoricalDataFromAlphaVantage(symbols,args.outputfolder,args.identifier,args.replace)
         sectorFolder = stocks.GetSectorInformationFromYahoo(symbols,args.outputfolder,args.identifier,args.replace)
         financialFolder= stocks.GetFinancialDataFromYahoo(symbols,args.outputfolder,args.identifier,args.replace)
     
-    datesInterval = stocks.GetDateInterval(list(folderSet),startdate,enddate)
+    datesInterval = stocks.GetDateInterval(folderHistorical,startdate,enddate)
+    quotesFolder = stocks.GetCleanDataframe(datesInterval,folderHistorical,args.outputfolder)
     #print datesInterval
     print "Done!"
 if  __name__ =='__main__': main() 
