@@ -60,15 +60,21 @@ class BovespaFileParser:
         self.filename = str(ntpath.basename(filename)).lower().replace(".txt",".csv")
         outputFile = os.path.join(outputFolder,self.filename)
         line = self.fileData[0]
+        #This 'chucks' are the size of each columns, in characters. When reading a line, the code splits the line into 
+        #these characters intervals in order to separate the data in columns (described in HistoricalQuotations_B3.pdf file)
         headerchunks = [[0,2],[2,15],[15,23],[23,31]]
         linechunks = [[0,2],[2,10],[10,12],[12,24],[24,27],[27,39],[39,49],[49,52],[52,56],[56,69],[69,82],[82,95],[95,108],
                       [108,121],[121,134],[134,147],[147,152],[152,170],[170,188],[188,201],[201,202],[202,210],[210,217],[217,230],
                       [230,242],[242,245]]
         trailerchunks = [[0,2],[2,15],[15,23],[23,31],[31,42]]
 
+        #Split header data in columns
         header = [line[int(headerchunks[i][0]):int(headerchunks[i][1])] for i in xrange(0,len(headerchunks),1)]
+        #Format the header date in yyyy-mm-dd format
         header[3] = re.sub(r'([0-9]{4})([0-9]{2})([0-9]{2})',r'\1-\2-\3',header[3])
+        #Add commas as delimiters
         header = [','.join(header)]
+        #Columns are described in HistoricalQuotations_B3.pdf file
         columnNames = ['TYPE OF REGISTER','DATE OF EXCHANGE','BDI CODE','PAPER NEGOTIATION CODE','TYPE OF MARKET',
                        'ABBREVIATED NAME OF THE COMPANY','PAPER SPECIFICATION','FORWARD MARKET TERM IN DAYS',
                        'REFERENCE CURRENCY','MARKET PAPER OPENING FLOOR PRICE','MARKET PAPER HIGHEST FLOOR PRICE',
@@ -78,21 +84,34 @@ class BovespaFileParser:
                        'STRIKE PRICE FOR THE OPTIONS MARKET OR CONTRACT AMOUNT FOR THE SECONDARY FORWARD MARKET', 'STRIKE PRICE OR CONTRACT AMOUNT FOR OPTIONS OR SECONDARY FORWARD MARKETS CORRECTION INDICATOR',
                        'MATURITY DATE FOR OPTIONS OR SECONDARY FORWARD MARKET','PAPER QUOTATION FACTOR','STRIKE PRICE IN POINTS FOR OPTIONS REFERENCED IN US DOLLARS OR CONTRACT AMOUNT IN POINTS FOR SECONDARY FORWARD',
                        'PAPER CODE IN THE IS IN SYSTEM OR PAPER INTERNAL CODE','PAPER DISTRIBUTION NUMBER']
+        
+        #Add commas as delimiters of columns names
         columnNames = [','.join(columnNames)]
+        #List to store the data from file
         table = []     
         #table.append(header)
         table.append(columnNames)
         print "Reading File...\n"
         fileSize = int(len(self.fileData))
+
+        #Set properties for the progress bar
         self.progress(0,fileSize)  
         #time.sleep(0.1)
         count = 1
         self.progress(1,fileSize,"Reading File")
+        #Runs for each line of the file, excepts the header and trailer
         for x in xrange(1,len(self.fileData)-1,1):
             line = self.fileData[x]
+            #Splits the data into the chunks intervals
             data = [line[int(linechunks[i][0]):int(linechunks[i][1])] for i in xrange(0,len(linechunks),1)]
+            
+            #Trim data
             data =  [x.strip(' ') for x in data]
+
+            #Format quote data as yyyy-mm-dd
             data[1] = re.sub(r'([0-9]{4})([0-9]{2})([0-9]{2})',r'\1-\2-\3',data[1])
+
+            #Format data as a float number
             formated = ['{0:.2f}'.format(float(re.sub(r'(^[0-9]{11})',r'\1.',data[j]))) for j in xrange(9,16)] 
             data[9:16] = formated
             data[18] = '{0:.2f}'.format(float(re.sub(r'(^[0-9]{16})',r'\1.',data[18])))
@@ -100,12 +119,17 @@ class BovespaFileParser:
             data[21] = re.sub(r'([0-9]{4})([0-9]{2})([0-9]{2})',r'\1-\2-\3',data[21])
             data[23] = '{0:.2f}'.format(float(re.sub(r'(^[0-9]{7})',r'\1.',data[23])))
            
+            #Adds commas as delimiters for all columns
             data = [','.join(data)]
+
+            #Inserts the parsed line into the table
             table.append(data)
             self.progress(count+1,fileSize,"Reading File")
             count = count+1
            
         line = self.fileData[len(self.fileData)-1]
+
+        #Parses the trailer in the same way as the header
         trailer = [line[int(trailerchunks[i][0]):int(trailerchunks[i][1])] for i in xrange(0,len(trailerchunks),1)]
         trailer[3] = re.sub(r'([0-9]{4})([0-9]{2})([0-9]{2})',r'\1-\2-\3',trailer[3])
         trailer = [','.join(trailer)]
@@ -119,6 +143,8 @@ class BovespaFileParser:
         self.progress(0,tableSize,"Writing File")
         newFile = open(outputFile,'w')  
         count = 0
+
+        #Writes all lines into a new csv file
         for x in xrange(0,len(table),1):
             newFile.writelines(table[x])
             newFile.write("\n")
