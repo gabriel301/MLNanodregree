@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "CapstoneProject", "CapstoneProject\CapstoneProject.pyproj", "{DA44FC14-E72A-430B-95BF-A5B07AC39049}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "CapstoneProject", "src\CapstoneProject.pyproj", "{DA44FC14-E72A-430B-95BF-A5B07AC39049}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
