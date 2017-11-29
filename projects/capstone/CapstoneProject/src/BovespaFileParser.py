@@ -182,17 +182,18 @@ class BovespaFileParser:
             df = pd.read_csv(fileName)
 
             print "Filtering Data...\n"
-            #Filters only stock prices of interest
+            #Filters only stock prices codes of interest
             df = df[(df['BDI CODE'] == 2) & (df['TYPE OF MARKET']==10)]
 
             #Filters only papers of interest
-            specList = ['ON','PN','DRN']
+            specList = ['ON','PN']
             pattern = '|'.join(specList)
             df = df[df['PAPER SPECIFICATION'].str.contains(pattern)]
-
-            #Replaces all paper types for simpler ones
+            
+            #Replaces all paper types for simpler ones (EG: PNB -> PN, PN EJ N2 -> PN, ON ED NM -> ON etc)
             for spec in specList:
                 df['PAPER SPECIFICATION'] = df['PAPER SPECIFICATION'].apply(lambda x: re.sub('.*'+spec+'.*',spec,x))
+
 
             outputfileName= str(ntpath.basename(fileName)).lower().replace(".csv","_filtered.csv")
             
@@ -342,12 +343,22 @@ class BovespaFileParser:
         for symbolFile in files:
             print "Reading symbols file {}...".format(symbolFile)
             dfSymbols= pd.read_csv(symbolFile)
+
+            #Gets only the letters of the ticker. Eg. PETR3 and PETR4 becomes PETR.
+            #It is necessary because the info file does not contains the tickers numbers
             dfSymbols['CODE'] = dfSymbols['PAPER NEGOTIATION CODE'].str[:4]
             print "Reading info file {}...".format(InfoFile)
+
+            #Setting the delimiter as semi-collons because the info file contains subsectors and 
+            #segments names separeted by commas
             dfInfo = pd.read_csv(InfoFile,delimiter = ';')
             dfInfo.drop('COMPANY',axis=1,inplace=True)
             print "Merging Files..."
+
+            #Merge (inner join) at codes columns 
             dfResult = pd.merge(dfSymbols, dfInfo, on='CODE', how='left')
+
+            #Drops CODE column because there are already the ticker column with almost the same information
             dfResult.drop('CODE',axis=1,inplace=True)
             print "Writing Merged File..."
             outputfileName = str(ntpath.basename(symbolFile)).lower().replace(".csv","_info.csv")

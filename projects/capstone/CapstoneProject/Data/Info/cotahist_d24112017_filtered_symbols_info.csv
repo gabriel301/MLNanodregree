@@ -1,0 +1,295 @@
+PAPER NEGOTIATION CODE,ABBREVIATED NAME OF THE COMPANY,PAPER SPECIFICATION,SECTORS,SUBSECTORS,SEGMENTS
+AALR3,ALLIAR,ON,Health,"Medical and Hospitalar Services,Analysis and Diagnostics","Medical and Hospitalar Services,Analysis and Diagnostics"
+ABCB4,ABC BRASIL,PN,Financial,Financial Intermediaries,Banks
+ABEV3,AMBEV S/A,ON,Consumer Non Cyclical,Beverage,Beer and Soft Drinks
+ADHM3,ADVANCED-DH,ON,Consumer Non Cyclical,Personal Care and Cleaning Products,Personal Care Products
+AELP3,AES ELPA,ON,Utilities,Electric Utilities,Electric Utilities
+AGRO3,BRASILAGRO,ON,Consumer Non Cyclical,Farming,Agriculture
+ALPA3,ALPARGATAS,ON,Consumer Cyclical,"Textiles, Apparel and Footwear",Footwear
+ALPA4,ALPARGATAS,PN,Consumer Cyclical,"Textiles, Apparel and Footwear",Footwear
+ALSC3,ALIANSCE,ON,Financial,Real Estate,Real Estate
+ALUP3,ALUPAR,ON,Utilities,Electric Utilities,Electric Utilities
+ALUP4,ALUPAR,PN,Utilities,Electric Utilities,Electric Utilities
+AMAR3,LOJAS MARISA,ON,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+ANIM3,ANIMA,ON,Consumer Cyclical,Diversified,Educational Services
+ARZZ3,AREZZO CO,ON,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+ATOM3,ATOMPAR,ON,Financial,Others,Others
+AZEV4,AZEVEDO,PN,Capital Goods and Services,Construction and Engineering,Heavy Construction
+AZUL4,AZUL,PN,Capital Goods and Services,Transportation,Airlines
+BAUH4,EXCELSIOR,PN,Consumer Non Cyclical,Food Processors,"Meat, Poultry and Others"
+BBAS3,BRASIL,ON,Financial,Financial Intermediaries,Banks
+BBDC3,BRADESCO,ON,Financial,Financial Intermediaries,Banks
+BBDC4,BRADESCO,PN,Financial,Financial Intermediaries,Banks
+BBRK3,BR BROKERS,ON,Financial,Real Estate,Property Agency
+BBSE3,BBSEGURIDADE,ON,Financial,"Insurance, Life and Multi-line",Insurance
+BEEF3,MINERVA,ON,Consumer Non Cyclical,Food Processors,"Meat, Poultry and Others"
+BEES3,BANESTES,ON,Financial,Financial Intermediaries,Banks
+BEES4,BANESTES,PN,Financial,Financial Intermediaries,Banks
+BGIP4,BANESE,PN,Financial,Financial Intermediaries,Banks
+BIOM3,BIOMM,ON,Health,Pharmaceutical and Others Products,Pharmaceutical and Others Products
+BMEB3,MERC BRASIL,ON,Financial,Financial Intermediaries,Banks
+BMEB4,MERC BRASIL,PN,Financial,Financial Intermediaries,Banks
+BMIN3,MERC INVEST,ON,Financial,Financial Intermediaries,Banks
+BOBR4,BOMBRIL,PN,Consumer Non Cyclical,Personal Care and Cleaning Products,Cleaning Products
+BPAN4,BANCO PAN,PN,Financial,Financial Intermediaries,Banks
+BPHA3,BR PHARMA,ON,Health,Retail and Distribution,Pharmaceutical and Others Products
+BRAP3,BRADESPAR,ON,Basic Materials,Mining,Metalic Minerals
+BRAP4,BRADESPAR,PN,Basic Materials,Mining,Metalic Minerals
+BRFS3,BRF SA,ON,Consumer Non Cyclical,Food Processors,"Meat, Poultry and Others"
+BRGE12,ALFA CONSORC,PN,Financial,Financial Intermediaries,Banks
+BRIN3,BR INSURANCE,ON,Financial,"Insurance, Life and Multi-line",Insurance Brokers
+BRIV3,ALFA INVEST,ON,Financial,Financial Intermediaries,Banks
+BRIV4,ALFA INVEST,PN,Financial,Financial Intermediaries,Banks
+BRKM3,BRASKEM,ON,Basic Materials,Chemicals,Petrochemicals
+BRKM5,BRASKEM,PN,Basic Materials,Chemicals,Petrochemicals
+BRML3,BR MALLS PAR,ON,Financial,Real Estate,Real Estate
+BRPR3,BR PROPERT,ON,Financial,Real Estate,Real Estate
+BRSR3,BANRISUL,ON,Financial,Financial Intermediaries,Banks
+BRSR5,BANRISUL,PN,Financial,Financial Intermediaries,Banks
+BRSR6,BANRISUL,PN,Financial,Financial Intermediaries,Banks
+BSEV3,BIOSEV,ON,Consumer Non Cyclical,Food Processors,Sugar and Alcohol
+BTOW3,B2W DIGITAL,ON,Consumer Cyclical,Retail,Diversified Retailers
+BTTL3,BATTISTELLA,ON,Financial,Holdings - Diversified,Holdings - Diversified
+BTTL4,BATTISTELLA,PN,Financial,Holdings - Diversified,Holdings - Diversified
+BVMF3,BMFBOVESPA,ON,Financial,Diversified Financial Services,Diversified Financial Services
+CAML3,CAMIL,ON,Consumer Non Cyclical,Food Processors,Other Food Manufacturing
+CARD3,CSU CARDSYST,ON,Capital Goods and Services,Diversified Services,Diversified Services
+CCRO3,CCR SA,ON,Capital Goods and Services,Transportation,Toll Roads and Highways
+CCXC3,CCX CARVAO,ON,Basic Materials,Mining,Non Metalics
+CEBR5,CEB,PN,Utilities,Electric Utilities,Electric Utilities
+CEDO3,CEDRO,ON,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+CEDO4,CEDRO,PN,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+CEED3,CEEE-D,ON,Utilities,Electric Utilities,Electric Utilities
+CELP3,CELPA,ON,Utilities,Electric Utilities,Electric Utilities
+CELP5,CELPA,PN,Utilities,Electric Utilities,Electric Utilities
+CELP7,CELPA,PN,Utilities,Electric Utilities,Electric Utilities
+CESP3,CESP,ON,Utilities,Electric Utilities,Electric Utilities
+CESP5,CESP,PN,Utilities,Electric Utilities,Electric Utilities
+CESP6,CESP,PN,Utilities,Electric Utilities,Electric Utilities
+CGAS3,COMGAS,ON,Utilities,Gas Utilities,Gas Utilities
+CGAS5,COMGAS,PN,Utilities,Gas Utilities,Gas Utilities
+CGRA4,GRAZZIOTIN,PN,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+CIEL3,CIELO,ON,Financial,Diversified Financial Services,Diversified Financial Services
+CLSC4,CELESC,PN,Utilities,Electric Utilities,Electric Utilities
+CMIG3,CEMIG,ON,Utilities,Electric Utilities,Electric Utilities
+CMIG4,CEMIG,PN,Utilities,Electric Utilities,Electric Utilities
+COCE5,COELCE,PN,Utilities,Electric Utilities,Electric Utilities
+CPFE3,CPFL ENERGIA,ON,Utilities,Electric Utilities,Electric Utilities
+CPLE3,COPEL,ON,Utilities,Electric Utilities,Electric Utilities
+CPLE6,COPEL,PN,Utilities,Electric Utilities,Electric Utilities
+CPRE3,CPFL RENOVAV,ON,Utilities,Electric Utilities,Electric Utilities
+CRDE3,CR2,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+CREM3,CREMER,ON,Health,Pharmaceutical and Others Products,Pharmaceutical and Others Products
+CRFB3,CARREFOUR BR,ON,Consumer Non Cyclical,Retail and Distribution,Food Retailers
+CRIV3,ALFA FINANC,ON,Financial,Financial Intermediaries,Savings and Loans
+CRIV4,ALFA FINANC,PN,Financial,Financial Intermediaries,Savings and Loans
+CRPG5,CRISTAL,PN,Basic Materials,Chemicals,Chemicals - Others
+CRPG6,CRISTAL,PN,Basic Materials,Chemicals,Chemicals - Others
+CSAN3,COSAN,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+CSMG3,COPASA,ON,Utilities,Water Utilities,Water Utilities
+CSNA3,SID NACIONAL,ON,Basic Materials,Steel and Metalurgy,Steel
+CTAX3,CONTAX,ON,Capital Goods and Services,Diversified Services,Diversified Services
+CTKA3,KARSTEN,ON,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+CTKA4,KARSTEN,PN,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+CTNM4,COTEMINAS,PN,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+CTSA3,SANTANENSE,ON,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+CVCB3,CVC BRASIL,ON,Consumer Cyclical,"Travel, Entertainment and Leisure",Travel and Tourism
+CYRE3,CYRELA REALT,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+DASA3,DASA,ON,Health,"Medical and Hospitalar Services,Analysis and Diagnostics","Medical and Hospitalar Services,Analysis and Diagnostics"
+DIRR3,DIRECIONAL,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+DMMO3,DOMMO,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+DTCY3,DTCOM-DIRECT,ON,Capital Goods and Services,Diversified Services,Diversified Services
+DTEX3,DURATEX,ON,Basic Materials,Wood and Paper,Wood
+EALT4,ACO ALTONA,PN,Capital Goods and Services,Machines and Equipments,Agricultural and Construction Machinery
+ECOR3,ECORODOVIAS,ON,Capital Goods and Services,Transportation,Toll Roads and Highways
+EGIE3,ENGIE BRASIL,ON,Utilities,Electric Utilities,Electric Utilities
+EKTR3,ELEKTRO,ON,Utilities,Electric Utilities,Electric Utilities
+EKTR4,ELEKTRO,PN,Utilities,Electric Utilities,Electric Utilities
+ELEK3,ELEKEIROZ,ON,Basic Materials,Chemicals,Petrochemicals
+ELET3,ELETROBRAS,ON,Utilities,Electric Utilities,Electric Utilities
+ELET6,ELETROBRAS,PN,Utilities,Electric Utilities,Electric Utilities
+ELPL3,ELETROPAULO,ON,Utilities,Electric Utilities,Electric Utilities
+ELPL4,ELETROPAULO,PN,Utilities,Electric Utilities,Electric Utilities
+EMAE4,EMAE,PN,Utilities,Electric Utilities,Electric Utilities
+EMBR3,EMBRAER,ON,Capital Goods and Services,Transportation Equipment and Components,Aerospace and Defense
+ENBR3,ENERGIAS BR,ON,Utilities,Electric Utilities,Electric Utilities
+ENEV3,ENEVA,ON,Utilities,Electric Utilities,Electric Utilities
+ENMA3B,CEMAR,ON,Utilities,Electric Utilities,Electric Utilities
+EQTL3,EQUATORIAL,ON,Utilities,Electric Utilities,Electric Utilities
+ESTC3,ESTACIO PART,ON,Consumer Cyclical,Diversified,Educational Services
+ESTR4,ESTRELA,PN,Consumer Cyclical,"Travel, Entertainment and Leisure",Toys and Games
+ETER3,ETERNIT,ON,Capital Goods and Services,Construction and Engineering,Building Products   
+EUCA4,EUCATEX,PN,Basic Materials,Wood and Paper,Wood
+EVEN3,EVEN,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+EZTC3,EZTEC,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+FESA3,FERBASA,ON,Basic Materials,Steel and Metalurgy,Steel
+FESA4,FERBASA,PN,Basic Materials,Steel and Metalurgy,Steel
+FHER3,FER HERINGER,ON,Basic Materials,Chemicals,Fertilizers
+FIBR3,FIBRIA,ON,Basic Materials,Wood and Paper,Pulp and Paper
+FJTA3,FORJA TAURUS,ON,Capital Goods and Services,Machines and Equipments,Weapons and Munitions
+FJTA4,FORJA TAURUS,PN,Capital Goods and Services,Machines and Equipments,Weapons and Munitions
+FLRY3,FLEURY,ON,Health,"Medical and Hospitalar Services,Analysis and Diagnostics","Medical and Hospitalar Services,Analysis and Diagnostics"
+FRAS3,FRAS-LE,ON,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+GEPA3,GER PARANAP,ON,Utilities,Electric Utilities,Electric Utilities
+GEPA4,GER PARANAP,PN,Utilities,Electric Utilities,Electric Utilities
+GFSA3,GAFISA,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+GGBR3,GERDAU,ON,Basic Materials,Steel and Metalurgy,Steel
+GGBR4,GERDAU,PN,Basic Materials,Steel and Metalurgy,Steel
+GOAU3,GERDAU MET,ON,Basic Materials,Steel and Metalurgy,Steel
+GOAU4,GERDAU MET,PN,Basic Materials,Steel and Metalurgy,Steel
+GOLL4,GOL,PN,Capital Goods and Services,Transportation,Airlines
+GRND3,GRENDENE,ON,Consumer Cyclical,"Textiles, Apparel and Footwear",Footwear
+GSHP3,GENERALSHOPP,ON,Financial,Real Estate,Real Estate
+GUAR3,GUARARAPES,ON,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+GUAR4,GUARARAPES,PN,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+HAGA4,HAGA S/A,PN,Capital Goods and Services,Construction and Engineering,Building Products   
+HBOR3,HELBOR,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+HETA4,HERCULES,PN,Consumer Cyclical,Household Products,Houseware Utensils
+HGTX3,CIA HERING,ON,Consumer Cyclical,"Textiles, Apparel and Footwear",Apparel and Clothing
+HOOT4,HOTEIS OTHON,PN,Consumer Cyclical,Hotels and Restaurants,Hotels
+HYPE3,HYPERMARCAS,ON,Consumer Non Cyclical,Diversified,Diversified Products
+IDNT3,IDEIASNET,ON,Information Technology,Software and Services,Software and Services
+IDVL4,INDUSVAL,PN,Financial,Financial Intermediaries,Banks
+IGBR3,IGB S/A,ON,Consumer Cyclical,Household Products,Household Appliance
+IGTA3,IGUATEMI,ON,Financial,Real Estate,Real Estate
+IRBR3,IRBBRASIL RE,ON,Financial,"Insurance, Life and Multi-line",Insurance
+ITSA3,ITAUSA,ON,Financial,Financial Intermediaries,Banks
+ITSA4,ITAUSA,PN,Financial,Financial Intermediaries,Banks
+ITUB3,ITAUUNIBANCO,ON,Financial,Financial Intermediaries,Banks
+ITUB4,ITAUUNIBANCO,PN,Financial,Financial Intermediaries,Banks
+JBDU4,J B DUARTE,PN,Financial,Holdings - Diversified,Holdings - Diversified
+JFEN3,JOAO FORTES,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+JHSF3,JHSF PART,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+JSLG3,JSL,ON,Capital Goods and Services,Transportation,Trucking
+KEPL3,KEPLER WEBER,ON,Capital Goods and Services,Machines and Equipments,Machines and Industrial Equipments
+KLBN3,KLABIN S/A,ON,Basic Materials,Wood and Paper,Pulp and Paper
+KLBN4,KLABIN S/A,PN,Basic Materials,Wood and Paper,Pulp and Paper
+KROT3,KROTON,ON,Consumer Cyclical,Diversified,Educational Services
+LAME3,LOJAS AMERIC,ON,Consumer Cyclical,Retail,Diversified Retailers
+LAME4,LOJAS AMERIC,PN,Consumer Cyclical,Retail,Diversified Retailers
+LCAM3,LOCAMERICA,ON,Consumer Cyclical,Diversified,Car Rental
+LEVE3,METAL LEVE,ON,Consumer Cyclical,Automobiles and Motorcycles,Automobiles and Motorcycles
+LIGT3,LIGHT S/A,ON,Utilities,Electric Utilities,Electric Utilities
+LINX3,LINX,ON,Information Technology,Software and Services,Software and Services
+LIPR3,ELETROPAR,ON,Utilities,Electric Utilities,Electric Utilities
+LLIS3,LE LIS BLANC,ON,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+LOGN3,LOG-IN,ON,Capital Goods and Services,Transportation,Marine and Water Transport
+LPSB3,LOPES BRASIL,ON,Financial,Real Estate,Property Agency
+LREN3,LOJAS RENNER,ON,Consumer Cyclical,Retail,"Apparel, Fabric and Footwear"
+MAGG3,MAGNESITA SA,ON,Basic Materials,Diversified Materials,Other Materials
+MDIA3,M.DIASBRANCO,ON,Consumer Non Cyclical,Food Processors,Other Food Manufacturing
+MEAL3,IMC S/A,ON,Consumer Cyclical,Hotels and Restaurants,Restaurants and Similars
+MGEL4,MANGELS INDL,PN,Basic Materials,Steel and Metalurgy,Iron and Steel Products
+MGLU3,MAGAZ LUIZA,ON,Consumer Cyclical,Retail,Electronics and Household Appliance
+MILS3,MILLS,ON,Capital Goods and Services,Construction and Engineering,Diversified Services
+MLFT4,JEREISSATI,PN,Telecommunications,Telecommunications,Telecommunications
+MNDL3,MUNDIAL,ON,Consumer Cyclical,"Textiles, Apparel and Footwear",Accessories
+MNPR3,MINUPAR,ON,Consumer Non Cyclical,Food Processors,"Meat, Poultry and Others"
+MOVI3,MOVIDA,ON,Consumer Cyclical,Diversified,Car Rental
+MPLU3,MULTIPLUS,ON,Consumer Cyclical,Diversified,Loyalty Programs
+MRFG3,MARFRIG,ON,Consumer Non Cyclical,Food Processors,"Meat, Poultry and Others"
+MRVE3,MRV,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+MTSA4,METISA,PN,Capital Goods and Services,Machines and Equipments,Agricultural and Construction Machinery
+MULT3,MULTIPLAN,ON,Financial,Real Estate,Real Estate
+MYPK3,IOCHP-MAXION,ON,Consumer Cyclical,Automobiles and Motorcycles,Automobiles and Motorcycles
+NATU3,NATURA,ON,Consumer Non Cyclical,Personal Care and Cleaning Products,Personal Care Products
+ODPV3,ODONTOPREV,ON,Health,"Medical and Hospitalar Services,Analysis and Diagnostics","Medical and Hospitalar Services,Analysis and Diagnostics"
+OFSA3,OUROFINO S/A,ON,Health,Pharmaceutical and Others Products,Pharmaceutical and Others Products
+OGXP3,OGX PETROLEO,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+OMGE3,OMEGA GER,ON,Utilities,Electric Utilities,Electric Utilities
+PARD3,IHPARDINI,ON,Health,"Medical and Hospitalar Services,Analysis and Diagnostics","Medical and Hospitalar Services,Analysis and Diagnostics"
+PCAR4,P.ACUCAR-CBD,PN,Consumer Non Cyclical,Retail and Distribution,Food Retailers
+PETR3,PETROBRAS,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+PETR4,PETROBRAS,PN,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+PFRM3,PROFARMA,ON,Health,Retail and Distribution,Pharmaceutical and Others Products
+PINE4,PINE,PN,Financial,Financial Intermediaries,Banks
+PLAS3,PLASCAR PART,ON,Consumer Cyclical,Automobiles and Motorcycles,Automobiles and Motorcycles
+PMAM3,PARANAPANEMA,ON,Basic Materials,Steel and Metalurgy,Copper Products
+PNVL3,DIMED,ON,Health,Retail and Distribution,Pharmaceutical and Others Products
+POMO3,MARCOPOLO,ON,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+POMO4,MARCOPOLO,PN,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+POSI3,POSITIVO TEC,ON,Information Technology,Hardware and Equipments,Hardware and Equipments
+PRIO3,PETRORIO,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+PRML3,PRUMO,ON,Capital Goods and Services,Transportation,Warehousing and Storage
+PSSA3,PORTO SEGURO,ON,Financial,"Insurance, Life and Multi-line",Insurance
+PTBL3,PORTOBELLO,ON,Capital Goods and Services,Construction and Engineering,Building Products   
+PTNT4,PETTENATI,PN,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+QGEP3,QGEP PART,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+QUAL3,QUALICORP,ON,Health,"Medical and Hospitalar Services,Analysis and Diagnostics","Medical and Hospitalar Services,Analysis and Diagnostics"
+RADL3,RAIADROGASIL,ON,Health,Retail and Distribution,Pharmaceutical and Others Products
+RAIL3,RUMO S.A.,ON,Capital Goods and Services,Transportation,Railroads
+RANI3,CELUL IRANI,ON,Basic Materials,Wood and Paper,Pulp and Paper
+RANI4,CELUL IRANI,PN,Basic Materials,Wood and Paper,Pulp and Paper
+RAPT3,RANDON PART,ON,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+RAPT4,RANDON PART,PN,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+RCSL3,RECRUSUL,ON,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+RCSL4,RECRUSUL,PN,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+RDNI3,RODOBENSIMOB,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+REDE3,REDE ENERGIA,ON,Utilities,Electric Utilities,Electric Utilities
+RENT3,LOCALIZA,ON,Consumer Cyclical,Diversified,Car Rental
+RLOG3,COSAN LOG,ON,Capital Goods and Services,Transportation,Railroads
+RNEW3,RENOVA,ON,Utilities,Electric Utilities,Electric Utilities
+RNEW4,RENOVA,PN,Utilities,Electric Utilities,Electric Utilities
+ROMI3,INDS ROMI,ON,Capital Goods and Services,Machines and Equipments,Machines and Industrial Equipments
+RPAD6,ALFA HOLDING,PN,Financial,Financial Intermediaries,Banks
+RSID3,ROSSI RESID,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+SANB3,SANTANDER BR,ON,Financial,Financial Intermediaries,Banks
+SANB4,SANTANDER BR,PN,Financial,Financial Intermediaries,Banks
+SAPR3,SANEPAR,ON,Utilities,Water Utilities,Water Utilities
+SAPR4,SANEPAR,PN,Utilities,Water Utilities,Water Utilities
+SBSP3,SABESP,ON,Utilities,Water Utilities,Water Utilities
+SCAR3,SAO CARLOS,ON,Financial,Real Estate,Real Estate
+SEDU3,SOMOS EDUCA,ON,Consumer Cyclical,Diversified,Educational Services
+SEER3,SER EDUCA,ON,Consumer Cyclical,Diversified,Educational Services
+SGPS3,SPRINGS,ON,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+SHOW3,TIME FOR FUN,ON,Consumer Cyclical,"Travel, Entertainment and Leisure",Entertainment
+SHUL4,SCHULZ,PN,Capital Goods and Services,Machines and Equipments,"Motors, Compressors and Others"
+SLCE3,SLC AGRICOLA,ON,Consumer Non Cyclical,Farming,Agriculture
+SLED3,SARAIVA LIVR,ON,Consumer Cyclical,Retail,Diversified Retailers
+SLED4,SARAIVA LIVR,PN,Consumer Cyclical,Retail,Diversified Retailers
+SMLS3,SMILES,ON,Consumer Cyclical,Diversified,Loyalty Programs
+SMTO3,SAO MARTINHO,ON,Consumer Non Cyclical,Food Processors,Sugar and Alcohol
+SNSL3,SENIOR SOL,ON,Information Technology,Software and Services,Software and Services
+SPRI3,SPRINGER,ON,Financial,Holdings - Diversified,Holdings - Diversified
+SSBR3,SIERRABRASIL,ON,Financial,Real Estate,Real Estate
+STBP3,SANTOS BRP,ON,Capital Goods and Services,Transportation,Warehousing and Storage
+SUZB3,SUZANO PAPEL,ON,Basic Materials,Wood and Paper,Pulp and Paper
+TAEE3,TAESA,ON,Utilities,Electric Utilities,Electric Utilities
+TAEE4,TAESA,PN,Utilities,Electric Utilities,Electric Utilities
+TCSA3,TECNISA,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+TECN3,TECHNOS,ON,Consumer Cyclical,"Textiles, Apparel and Footwear",Accessories
+TELB3,TELEBRAS,ON,Telecommunications,Telecommunications,Telecommunications
+TELB4,TELEBRAS,PN,Telecommunications,Telecommunications,Telecommunications
+TEND3,TENDA,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+TESA3,TERRA SANTA,ON,Consumer Non Cyclical,Farming,Agriculture
+TGMA3,TEGMA,ON,Capital Goods and Services,Transportation,Trucking
+TIET3,AES TIETE E,ON,Utilities,Electric Utilities,Electric Utilities
+TIET4,AES TIETE E,PN,Utilities,Electric Utilities,Electric Utilities
+TIMP3,TIM PART S/A,ON,Telecommunications,Telecommunications,Telecommunications
+TOTS3,TOTVS,ON,Information Technology,Software and Services,Software and Services
+TOYB3,TECTOY,ON,Consumer Cyclical,"Travel, Entertainment and Leisure",Toys and Games
+TOYB4,TECTOY,PN,Consumer Cyclical,"Travel, Entertainment and Leisure",Toys and Games
+TRIS3,TRISUL,ON,Consumer Cyclical,Heavy Construction,Homebuilding 
+TRPL4,TRAN PAULIST,PN,Utilities,Electric Utilities,Electric Utilities
+TRPN3,TARPON INV,ON,Financial,Diversified Financial Services,Asset Management and Investments
+TUPY3,TUPY,ON,Capital Goods and Services,Transportation Equipment and Components,Transportation Equipment - Diversified
+TXRX4,TEX RENAUX,PN,Consumer Cyclical,"Textiles, Apparel and Footwear","Fabric, Thread and Fibers"
+UCAS3,UNICASA,ON,Consumer Cyclical,Household Products,Home Furnishing
+UGPA3,ULTRAPAR,ON,"Oil, Gas and Biofuels","Oil, Gas and Biofuels","Exploration, Refining and Distribution"
+UNIP3,UNIPAR,ON,Basic Materials,Chemicals,Chemicals - Others
+UNIP6,UNIPAR,PN,Basic Materials,Chemicals,Chemicals - Others
+USIM3,USIMINAS,ON,Basic Materials,Steel and Metalurgy,Steel
+USIM5,USIMINAS,PN,Basic Materials,Steel and Metalurgy,Steel
+VALE3,VALE,ON,Basic Materials,Mining,Metalic Minerals
+VALE5,VALE,PN,Basic Materials,Mining,Metalic Minerals
+VIVT3,TELEF BRASIL,ON,Telecommunications,Telecommunications,Telecommunications
+VIVT4,TELEF BRASIL,PN,Telecommunications,Telecommunications,Telecommunications
+VLID3,VALID,ON,Capital Goods and Services,Diversified Services,Diversified Services
+VULC3,VULCABRAS,ON,Consumer Cyclical,"Textiles, Apparel and Footwear",Footwear
+VVAR3,VIAVAREJO,ON,Consumer Cyclical,Retail,Electronics and Household Appliance
+VVAR4,VIAVAREJO,PN,Consumer Cyclical,Retail,Electronics and Household Appliance
+WEGE3,WEG,ON,Capital Goods and Services,Machines and Equipments,"Motors, Compressors and Others"
+WHRL3,WHIRLPOOL,ON,Consumer Cyclical,Household Products,Household Appliance
+WHRL4,WHIRLPOOL,PN,Consumer Cyclical,Household Products,Household Appliance
+WIZS3,WIZ S.A.,ON,Financial,"Insurance, Life and Multi-line",Insurance Brokers
+WLMM4,WLM IND COM,PN,Capital Goods and Services,Retail,Transportation Material

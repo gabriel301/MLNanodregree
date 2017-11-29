@@ -76,7 +76,7 @@ class StockHistoricalData:
     def GetHistoricalDataFromAlphaVantage(self,stockSymbols,outputfolder,identifier,replace):
         total = len(stockSymbols)
         count=1
-        apiKey = "2LZWQ360LNACRFVZ"
+        apiKey = ""
         self.CreateFolder(outputfolder)
         outputPath = os.path.join(outputfolder,"Download")
         self.CreateFolder(outputPath)
@@ -252,6 +252,7 @@ class StockHistoricalData:
             listSymbols = df.values.T.tolist()
             return listSymbols[0]
 
+    #Get all files in a folder which have a certain extension
     def GetFilesFromFolder(self,folder,fileExtension):
 
         fileExtension = fileExtension if fileExtension.find('.') == 0 else "." + fileExtension
