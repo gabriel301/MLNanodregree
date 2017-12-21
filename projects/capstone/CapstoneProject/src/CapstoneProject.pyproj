@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>da44fc14-e72a-430b-95bf-a5b07ac39049</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>BovespaFileParser.py</StartupFile>
+    <StartupFile>StockHistoricalData.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,6 +24,7 @@
   <ItemGroup>
     <Compile Include="StockHistoricalData.py" />
     <Compile Include="BovespaFileParser.py" />
+    <Compile Include="StockHistoricalDataDownloader.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|AnacondaMLPython27" />
