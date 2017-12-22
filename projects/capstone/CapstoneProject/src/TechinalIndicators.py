@@ -34,7 +34,7 @@ class TechnicalIndicators:
             dfQuote = pd.read_csv(file)
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating BBands file {}".format(file)
-                upperband, middleband, lowerband = np.nan_to_num(talib.BBANDS(dfQuote['Adjusted_Close'].values,period,std))
+                upperband, middleband, lowerband = talib.BBANDS(dfQuote['Adjusted_Close'].values,period,std)
                 self.WriteIndicator(dfQuote,prefix,"Upper_BBand",upperband,file,outputfolder)
                 self.WriteIndicator(dfQuote,prefix,"Mid_BBand",middleband,file,outputfolder)
                 path = self.WriteIndicator(dfQuote,prefix,"Lower_BBand",lowerband,file,outputfolder)
@@ -52,7 +52,7 @@ class TechnicalIndicators:
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating SMA for file {}".format(file)
                 prices = dfQuote['Adjusted_Close'].tolist()
-                result = np.nan_to_num(talib.SMA(dfQuote['Adjusted_Close'].values,period))
+                result = talib.SMA(dfQuote['Adjusted_Close'].values,period)
                 path = self.WriteIndicator(dfQuote,prefix,"SMA",result,file,outputfolder)
         return path
 
@@ -68,7 +68,7 @@ class TechnicalIndicators:
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating EMA for file {}".format(file)
                 prices = dfQuote['Adjusted_Close'].tolist()
-                result = np.nan_to_num(talib.EMA(dfQuote['Adjusted_Close'].values,period))
+                result = talib.EMA(dfQuote['Adjusted_Close'].values,period)
                 path = self.WriteIndicator(dfQuote,prefix,"EMA",result,file,outputfolder)
         return path
 
@@ -81,7 +81,7 @@ class TechnicalIndicators:
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating Momentum for file {}".format(file)
                 prices = dfQuote['Adjusted_Close'].tolist()
-                result = np.nan_to_num(talib.MOM(dfQuote['Adjusted_Close'].values))
+                result = talib.MOM(dfQuote['Adjusted_Close'].values)
                 path = self.WriteIndicator(dfQuote,prefix,"MOM",result,file,outputfolder)
         return path
 
@@ -94,7 +94,7 @@ class TechnicalIndicators:
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating Momentum for file {}".format(file)
                 prices = dfQuote['Adjusted_Close'].tolist()
-                result = np.nan_to_num(talib.RSI(dfQuote['Adjusted_Close'].values))
+                result = talib.RSI(dfQuote['Adjusted_Close'].values)
                 path = self.WriteIndicator(dfQuote,prefix,"RSI",result,file,outputfolder)
         return path
 
@@ -108,7 +108,7 @@ class TechnicalIndicators:
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating MACD for file {}".format(file)
                 prices = dfQuote['Adjusted_Close'].tolist()
-                macd, macdsignal, macdhist = np.nan_to_num(talib.MACD(dfQuote['Adjusted_Close'].values))
+                macd, macdsignal, macdhist = talib.MACD(dfQuote['Adjusted_Close'].values)
                 path = self.WriteIndicator(dfQuote,prefix,"MACD",macd,file,outputfolder)
                 path = self.WriteIndicator(dfQuote,prefix,"MACD_SIGNAL",macdsignal,file,outputfolder)
                 path = self.WriteIndicator(dfQuote,prefix,"MACD_HIST",macdhist,file,outputfolder)
@@ -124,7 +124,7 @@ class TechnicalIndicators:
             if 'Adjusted_Close' in dfQuote.columns:
                 print "Calculating MACD for file {}".format(file)
                 prices = dfQuote['Adjusted_Close'].tolist()
-                slowk, slowd = np.nan_to_num(talib.STOCH(dfQuote['High'].values,dfQuote['Low'].values,dfQuote['Adjusted_Close'].values))
+                slowk, slowd = talib.STOCH(dfQuote['High'].values,dfQuote['Low'].values,dfQuote['Adjusted_Close'].values)
                 path = self.WriteIndicator(dfQuote,prefix,"STOCH_SLOWK",slowk,file,outputfolder)
                 path = self.WriteIndicator(dfQuote,prefix,"STOCH_SLOWD",slowd,file,outputfolder)
                
@@ -134,7 +134,7 @@ class TechnicalIndicators:
         if not os.path.exists(path):
             os.makedirs(path)
 
-    ##WriteIndicator
+    #Normalizar saida dos indicadores
     def WriteIndicator(self,df,prefix,indicator,values,filename,outputfolder):
         self.CreateFolder(outputfolder)
         outputPath = os.path.join(outputfolder,"Data")
@@ -147,8 +147,19 @@ class TechnicalIndicators:
         outputfolder = os.path.join(outputPath,outputfileName)
         columnName = prefix + "_"+indicator
         print "Writing {} values in {} file...".format(indicator,outputfileName)
-        df[columnName] = values
-        ##df =  df.apply(pd.to_numeric, errors='ignore')
+        mdata = np.ma.masked_array(values,np.isnan(values))
+        ##mmean = np.mean(mdata)
+        ##mstd = np.std(mdata)
+        ##normed = (mdata - mmean) / mstd
+        ##normed = normed.filled(np.nan)
+        ##normed = np.nan_to_num(normed)\
+        mmax = np.max(mdata)
+        mmin = np.min(mdata)
+        scaled = (mdata-mmin)/(mmax-mmin)
+        scaled = scaled.filled(np.nan)
+        ##scaled = np.nan_to_num(scaled)
+        df[columnName] = scaled
+        df.fillna(method='bfill',inplace=True)
         df.to_csv(outputfolder,index=False)
         print "Done!"
         return outputPath
@@ -156,6 +167,8 @@ def main():
     inputFolder = "C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Quotes\Normalized"
     outputFolder = "C:\Users\Augus\Desktop\TesteDonwloader"
     indicators = TechnicalIndicators()
+
+    #Normalizar saida dos indicadores
     inputFolder = indicators.GetSMA(inputFolder,15,"Short",outputFolder)
     indicators.GetSMA(inputFolder,30,"Middle",outputFolder)
     indicators.GetSMA(inputFolder,50,"Long",outputFolder)
