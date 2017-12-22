@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>da44fc14-e72a-430b-95bf-a5b07ac39049</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>StockHistoricalData.py</StartupFile>
+    <StartupFile>TechinalIndicators.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,9 +22,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="StockHistoricalData.py" />
-    <Compile Include="BovespaFileParser.py" />
+    <Compile Include="TechinalIndicators.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="StockHistoricalDataDownloader.py" />
+    <Compile Include="BovespaFileParser.py" />
+    <Compile Include="StockHistoricalData.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|AnacondaMLPython27" />

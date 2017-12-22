@@ -215,6 +215,8 @@ class StockHistoricalDataDownloader:
         self.CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Quotes")
         self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Cleaned")
+        self.CreateFolder(outputPath)
         dfDates = pd.DataFrame(intervalDates,columns = ['Date'])
         files = self.GetFilesFromFolder(inputfolder,'csv')
         total = len(files)
@@ -226,13 +228,45 @@ class StockHistoricalDataDownloader:
                 dfCleaned = pd.merge(dfDates, dfHistorical, on='Date', how='left')
                 dfCleaned.fillna(method='ffill',inplace=True)
                 dfCleaned.fillna(method='bfill',inplace=True)
+                dfCleaned['date2'] = dfCleaned.Date.astype('datetime64[ns]')
+                dfCleaned.sort_values('date2',inplace = True)
+                dfCleaned.drop('date2', axis=1, inplace=True)
                 outputfileName = str(ntpath.basename(stockfile))
                 outputFile = os.path.join(outputPath,outputfileName)
                 dfCleaned.to_csv(outputFile,index=False)
                 count = count + 1
                 print "File created at {}".format(outputFile)
         return outputPath
+        #Normalize
 
+    def GetNormalizedDataframe(self,inputfolder,outputfolder):
+        self.CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Data")
+        self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Historical")
+        self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Quotes")
+        self.CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Normalized")
+        self.CreateFolder(outputPath)
+        files = self.GetFilesFromFolder(inputfolder,'csv')
+        total = len(files)
+        count = 1
+        for stockfile in files:           
+            dfHistorical = pd.read_csv(stockfile)
+            if 'Date' in dfHistorical.columns:
+                print "Normalizing data from file {} ({} of {})".format(stockfile,count,total)
+                dfNormalized = dfHistorical.drop('Date', axis=1).drop('Ticker', axis=1)
+                dfNormalized = dfNormalized/dfNormalized.ix[0,:]
+                dfNormalized['Date'] = dfHistorical["Date"]
+                dfNormalized['Ticker'] = dfHistorical["Ticker"]
+                dfNormalized = dfNormalized[['Date','Ticker','Open','High','Low','Close','Adjusted_Close','Volume']]
+                outputfileName = str(ntpath.basename(stockfile))
+                outputFile = os.path.join(outputPath,outputfileName)
+                dfNormalized.to_csv(outputFile,index=False)
+                count = count + 1
+                print "File created at {}".format(outputFile)
+        return outputPath
 def main():
     
     epilog = "Sample Usage: symbols outputFolder"
@@ -296,5 +330,6 @@ def main():
     
     datesInterval = stocks.GetDateInterval(folderHistorical,startdate,enddate)
     quotesFolder = stocks.GetCleanDataframe(datesInterval,folderHistorical,args.outputfolder)
+    normalizedFolder = stocks.GetNormalizedDataframe(quotesFolder,args.outputfolder)
     print "Done!"
 if  __name__ =='__main__': main() 
