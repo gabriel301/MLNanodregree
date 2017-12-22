@@ -28,6 +28,9 @@
     <Compile Include="StockHistoricalDataDownloader.py" />
     <Compile Include="BovespaFileParser.py" />
     <Compile Include="StockHistoricalData.py" />
+    <Compile Include="Util.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|AnacondaMLPython27" />

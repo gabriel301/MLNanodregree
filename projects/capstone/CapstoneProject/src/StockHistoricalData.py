@@ -435,7 +435,7 @@ def main():
     
     datesInterval = stocks.GetDateInterval(folderHistorical,startdate,enddate)
     quotesFolder = stocks.GetCleanDataframe(datesInterval,folderHistorical,args.outputfolder)
-    normalizedFolder = stocks.GetNormalizedDataframe(quotesFolder,args.outputfolder)
+    #normalizedFolder = stocks.GetNormalizedDataframe(quotesFolder,args.outputfolder)
     #print datesInterval
     print "Done!"
 if  __name__ =='__main__': main() 

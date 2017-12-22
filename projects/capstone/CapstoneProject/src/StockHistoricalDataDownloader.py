@@ -10,8 +10,8 @@ import requests
 import argparse
 import datetime
 from operator import itemgetter
-import math
 import numpy as np
+from Util import Util
 
 class StockHistoricalDataDownloader:
     
@@ -19,13 +19,13 @@ class StockHistoricalDataDownloader:
         total = len(stockSymbols)
         count=1
         apiKey = "2LZWQ360LNACRFVZ"
-        self.CreateFolder(outputfolder)
+        Util().CreateFolder(outputfolder)
         outputPath = os.path.join(outputfolder,"Download")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Historical")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"AlphaVantage")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         notFoundSymbols = []
         if(identifier):
                 identifier = str(identifier) if str(identifier).find('.') == 0 else "." + str(identifier)
@@ -77,13 +77,13 @@ class StockHistoricalDataDownloader:
         total = len(stockSymbols)
         count=1
 
-        self.CreateFolder(outputfolder)
+        Util().CreateFolder(outputfolder)
         outputPath = os.path.join(outputfolder,"Download")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Historical")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Yahoo")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
     
         notFoundSymbols = []
         attemps = 1
@@ -152,43 +152,18 @@ class StockHistoricalDataDownloader:
 
         return download
 
-    def CreateFolder(self,path):
-        if not os.path.exists(path):
-            os.makedirs(path)
 
     def ReadSymbols(self,filename):
             df = pd.read_csv(filename)
             listSymbols = df.values.T.tolist()
             return listSymbols[0]
 
-    #Get all files in a folder which have a certain extension
-    def GetFilesFromFolder(self,folder,fileExtension):
-
-        fileExtension = fileExtension if fileExtension.find('.') == 0 else "." + fileExtension
-        fileExtension = fileExtension.lower()
-        print "Getting {} files from {}".format(fileExtension,folder)
-        files = [os.path.join(root, name)
-             for root, dirs, files in os.walk(folder)
-                for name in files
-                    if name.lower().endswith(fileExtension)]
-
-        print "{} files found".format(len(files))
-        return files
-
-    def GetFileSizes(self,fileList):
-        fileInfo = []
-    
-        for filename in fileList:
-            print "Getting size information from {}...".format(filename)
-            size = math.ceil((float(os.path.getsize(filename))/1024))
-            fileInfo.append([size,filename])
-        return fileInfo
 
     def GetDateInterval(self, stocksFolder,startdate,enddate):
         datesSet = set()
         filesInfo = []
-        files = self.GetFilesFromFolder(stocksFolder,"csv")
-        filesInfo = self.GetFileSizes(files)
+        files = Util().GetFilesFromFolder(stocksFolder,"csv")
+        filesInfo = Util().GetFileSizes(files)
         filesInfo = sorted(filesInfo,key=itemgetter(0),reverse = True)
         filesInfo = filesInfo[:5]
         for item in filesInfo:          
@@ -208,24 +183,23 @@ class StockHistoricalDataDownloader:
         return listDates
 
     def GetCleanDataframe(self,intervalDates,inputfolder,outputfolder):
-        self.CreateFolder(outputfolder)
+        Util().CreateFolder(outputfolder)
         outputPath = os.path.join(outputfolder,"Data")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Historical")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Quotes")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Cleaned")
-        self.CreateFolder(outputPath)
-        dfDates = pd.DataFrame(intervalDates,columns = ['Date'])
-        files = self.GetFilesFromFolder(inputfolder,'csv')
+        Util().CreateFolder(outputPath)
+        files = Util().GetFilesFromFolder(inputfolder,'csv')
         total = len(files)
         count = 1
         for stockfile in files:           
             dfHistorical = pd.read_csv(stockfile)
             if 'Date' in dfHistorical.columns:
                 print "Cleaning data from file {} ({} of {})".format(stockfile,count,total)
-                dfCleaned = pd.merge(dfDates, dfHistorical, on='Date', how='left')
+                dfCleaned =  dfHistorical
                 dfCleaned.fillna(method='ffill',inplace=True)
                 dfCleaned.fillna(method='bfill',inplace=True)
                 dfCleaned['date2'] = dfCleaned.Date.astype('datetime64[ns]')
@@ -237,19 +211,19 @@ class StockHistoricalDataDownloader:
                 count = count + 1
                 print "File created at {}".format(outputFile)
         return outputPath
-        #Normalize
 
+    #Normalize prices to start from 1
     def GetNormalizedDataframe(self,inputfolder,outputfolder):
-        self.CreateFolder(outputfolder)
+        Util().CreateFolder(outputfolder)
         outputPath = os.path.join(outputfolder,"Data")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Historical")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Quotes")
-        self.CreateFolder(outputPath)
+        Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Normalized")
-        self.CreateFolder(outputPath)
-        files = self.GetFilesFromFolder(inputfolder,'csv')
+        Util().CreateFolder(outputPath)
+        files = Util().GetFilesFromFolder(inputfolder,'csv')
         total = len(files)
         count = 1
         for stockfile in files:           
