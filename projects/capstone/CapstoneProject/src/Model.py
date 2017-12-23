@@ -69,7 +69,7 @@ class Model:
         scores = {}
         featureColumns = list(df.columns.values)
         featureColumns = featureColumns[8:]
-        X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(df.copy(),featureColumns,['Adjusted_Close'],0.8,recordsToPredict)
+        X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
         for key in models:
             print "Tuning {} model...".format(key)
             Xtrain, ytrain = X_train, y_train
@@ -78,8 +78,8 @@ class Model:
             params[key] = b_params
             scores[key] = b_estimator.score(X_test,y_test)
             pred = b_estimator.predict(X_test)
-            print "Prediction: " + str(pred[len(pred)-1] * 6.39371)
-            print "Real: " + str(y_test[len(y_test)-1] * 6.39371)
+            print "Prediction: " + str(pred[len(pred)-1] * df['Adjusted_Close'][0])
+            print "Real: " + str(y_test[len(y_test)-1] * df['Adjusted_Close'][0])
             print "Score: " + str(scores[key])
 
     def GetPCs(self,df):
@@ -101,6 +101,7 @@ class Model:
 
 def main():
     file = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
+    print "File: {}".format(file[0])
     df = pd.read_csv(file[0])
     Model().GetBestEstimators(df,1)
 

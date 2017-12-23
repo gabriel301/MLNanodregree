@@ -230,14 +230,15 @@ class StockHistoricalDataDownloader:
             dfHistorical = pd.read_csv(stockfile)
             if 'Date' in dfHistorical.columns:
                 print "Normalizing data from file {} ({} of {})".format(stockfile,count,total)
-                dfNormalized = dfHistorical.drop('Date', axis=1).drop('Ticker', axis=1)
-                dfNormalized = dfNormalized/dfNormalized.ix[0,:]
-                dfNormalized['Date'] = dfHistorical["Date"]
-                dfNormalized['Ticker'] = dfHistorical["Ticker"]
-                dfNormalized = dfNormalized[['Date','Ticker','Open','High','Low','Close','Adjusted_Close','Volume']]
+                ##dfNormalized = dfHistorical.drop('Date', axis=1).drop('Ticker', axis=1)
+                ##dfNormalized = dfNormalized/dfNormalized.ix[0,:]
+                ##dfNormalized['Date'] = dfHistorical["Date"]
+                ##dfNormalized['Ticker'] = dfHistorical["Ticker"]
+                ##dfNormalized = dfNormalized[['Date','Ticker','Open','High','Low','Close','Adjusted_Close','Volume']]
+                dfHistorical["Norm_Adjusted_Close"] = dfHistorical["Adjusted_Close"]/dfHistorical["Adjusted_Close"][0]
                 outputfileName = str(ntpath.basename(stockfile))
                 outputFile = os.path.join(outputPath,outputfileName)
-                dfNormalized.to_csv(outputFile,index=False)
+                dfHistorical.to_csv(outputFile,index=False)
                 count = count + 1
                 print "File created at {}".format(outputFile)
         return outputPath
