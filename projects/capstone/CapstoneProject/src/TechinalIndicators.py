@@ -146,11 +146,6 @@ class TechnicalIndicators:
         outputfolder = os.path.join(outputPath,outputfileName)
         columnName = prefix + "_"+indicator
         print "Writing {} values in {} file...".format(indicator,outputfileName)
-        #mdata = np.ma.masked_array(values,np.isnan(values))
-        #mmax = np.max(mdata)
-        #mmin = np.min(mdata)
-        #scaled = (mdata-mmin)/(mmax-mmin)
-        #scaled = scaled.filled(np.nan)
         df[columnName] = values
         df.fillna(method='bfill',inplace=True)
         df.to_csv(outputfolder,index=False)
