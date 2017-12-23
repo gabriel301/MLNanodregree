@@ -63,13 +63,16 @@ class Model:
     #Estimar o preço pra T+1 com base em T-N+1 (fazer um shift de um dia no dataframe)
     #Com esse dado, calcular os indicadores e fazer o processo novamente, movendo mais um dia pra frente no dataframe
     #Fazer isso até chegar no dia desejado
-    def GetBestEstimators(self,df,recordsToPredict):
+    def GetBestEstimators(self,df,recordsToPredict,outputfolder):
         models = self.build_models()
         params = self.build_params()
         scores = {}
+        split =  np.array_split(df, 2)
+        dfTrain = split[0]
+        dfTest =  split[1]
         featureColumns = list(df.columns.values)
         featureColumns = featureColumns[8:]
-        X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
+        X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(dfTrain.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
         for key in models:
             print "Tuning {} model...".format(key)
             Xtrain, ytrain = X_train, y_train
@@ -77,11 +80,15 @@ class Model:
             models[key] = b_estimator
             params[key] = b_params
             scores[key] = b_estimator.score(X_test,y_test)
-            pred = b_estimator.predict(X_test)
-            print "Prediction: " + str(pred[len(pred)-1] * df['Adjusted_Close'][0])
-            print "Real: " + str(y_test[len(y_test)-1] * df['Adjusted_Close'][0])
-            print "Score: " + str(scores[key])
+            Xtest = dfTest[featureColumns].values
+            yTest = dfTest['Adjusted_Close'].values
+            pred = b_estimator.predict(Xtest)
+            reScaled = pred*df['Adjusted_Close'][0]
+            dfResult = pd.DataFrame(reScaled,columns=['Predicted'])
+            dfResult['Actual'] = yTest
+            Util().WritePrediction(dfResult,outputfolder,key,str(df["Ticker"][0])+".csv")
 
+    
     def GetPCs(self,df):
         print "PCA..."
         #Re-Scaling and Normalizing data
@@ -92,8 +99,8 @@ class Model:
         pca = pca.fit(df,1)
         ratio = pca.explained_variance_ratio_
         variance = pca.explained_variance_
-        float_formatter = lambda x: "%.2f" % x
-        np.set_printoptions(formatter={'float_kind':float_formatter})
+        #float_formatter = lambda x: "%.2f" % x
+        #np.set_printoptions(formatter={'float_kind':float_formatter})
         reduced_data = pca.transform(df)
         reduced_df = pd.DataFrame(reduced_data, columns = ['Indicators_PC'])
         
@@ -103,7 +110,7 @@ def main():
     file = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
     print "File: {}".format(file[0])
     df = pd.read_csv(file[0])
-    Model().GetBestEstimators(df,1)
+    Model().GetBestEstimators(df,1,'C:\Users\Augus\Desktop\TesteDonwloader\Data')
 
 
 if  __name__ =='__main__': main() 

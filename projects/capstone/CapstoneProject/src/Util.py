@@ -51,4 +51,16 @@ class Util:
             dfFiltered = pd.merge(dfDates, df, on='Date', how='left')
             return dfFiltered
 
-    
+    def WritePrediction(self, df, outputfolder,modelname,filename):
+        Util().CreateFolder(outputfolder)
+        outputPath = os.path.join(outputfolder,"Data")
+        Util().CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,"Predictions")
+        Util().CreateFolder(outputPath)
+        outputPath = os.path.join(outputPath,modelname)
+        Util().CreateFolder(outputPath)
+        outputfileName= str(ntpath.basename(filename))
+        outputfolder = os.path.join(outputPath,outputfileName)
+        print "Writing Predictions..."
+        df.to_csv(outputfolder,index=False)
+        print "Done!"
