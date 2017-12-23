@@ -51,11 +51,4 @@ class Util:
             dfFiltered = pd.merge(dfDates, df, on='Date', how='left')
             return dfFiltered
 
-    def GetTrainPredictData(df,target,trainSize,recordsToPredict):
-        #Selecting the features (Only the Techinical Indicators)
-        dfDropped = df.drop(df.ix[:,'Date':'Close'].head(0).columns, axis=1)
-        dfDropped.drop("Volume",axis=1,inplace = True)
-        X_predict = dfDropped
-        X_predict["Adjusted_Close"] = dfDropped["Adjusted_Close"].shift(-recordsToPredict)
-        X_train, X_test, y_train, y_test = train_test_split(dfDropped.drop("Adjusted_Price",axis=1),dfDropped["Adjusted_Price"], train_size=trainSize, random_state = 0)
-        return  X_train, X_test, y_train, y_test,X_predict
+    

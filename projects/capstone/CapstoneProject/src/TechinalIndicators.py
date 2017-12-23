@@ -173,7 +173,7 @@ class TechnicalIndicators:
         self.GetBoillingerBands(inputFolder,50,.1,"Long",outputFolder)
 
 def main():
-    inputFolder = "C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Quotes\Cleaned"
+    inputFolder = "C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Quotes\Normalized"
     outputFolder = "C:\Users\Augus\Desktop\TesteDonwloader"
     indicators = TechnicalIndicators()
 
