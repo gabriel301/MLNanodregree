@@ -11,76 +11,65 @@ class TechnicalIndicators:
     #ShortTerm - 10 days, 1.9 std
     #Standard - 20 days, 2 std
     #LongTerm - 50 days, 2.1 std
-    def GetBoillingerBands(self,dfQuote,period,std,prefix):
+    def GetBoillingerBands(self,values,period,std,prefix):
         prefix = prefix+"_"
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Billinger Bands..."
-            upperband, middleband, lowerband = talib.BBANDS(dfQuote['Norm_Adjusted_Close'].values,period,std)
-            values = [lowerband,middleband,upperband]
-            columns = [prefix+"Lower_BBand",prefix+"Mid_BBand",prefix+"Upper_BBand"]
-            df = Util().BuildDataFrame(columns,values).copy()
+        print "Calculating Billinger Bands..."
+        upperband, middleband, lowerband = talib.BBANDS(values,period,std)
+        values = [lowerband,middleband,upperband]
+        columns = [prefix+"Lower_BBand",prefix+"Mid_BBand",prefix+"Upper_BBand"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
     
     #Short Term - 15 days
     #Standard - 30 days
     #Long Term - 60 days
-    def GetSMA(self,dfQuote,period,prefix):
+    def GetSMA(self,values,period,prefix):
         prefix = prefix+"_"
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Simple Moving Average..."
-            prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            result = talib.SMA(dfQuote['Norm_Adjusted_Close'].values,period)
-            values = [result]
-            columns = [prefix+"SMA"]
-            df = Util().BuildDataFrame(columns,values).copy()
+        print "Calculating Simple Moving Average..."
+        result = talib.SMA(values,period)
+        values = [result]
+        columns = [prefix+"SMA"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
 
     #Short Term - 15 days
     #Standard - 30 days
     #Long Term - 60 days
-    def GetEMA(self,dfQuote,period,prefix):
-        prefix = prefix+"_"
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Exponential Moving Average..."
-            prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            result = talib.EMA(dfQuote['Norm_Adjusted_Close'].values,period)
-            values = [result]
-            columns = [prefix+"EMA"]
-            df = Util().BuildDataFrame(columns,values).copy()
+    def GetEMA(self,values,period,prefix):
+        prefix = prefix+"_"      
+        print "Calculating Exponential Moving Average..."
+        result = talib.EMA(values,period)
+        values = [result]
+        columns = [prefix+"EMA"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetMomentum(self,dfQuote,prefix):
+    def GetMomentum(self,values,prefix):
         prefix = prefix+"_"
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Momentum..."
-            prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            result = talib.MOM(dfQuote['Norm_Adjusted_Close'].values)
-            values = [result]
-            columns = [prefix+"MOM"]
-            df = Util().BuildDataFrame(columns,values).copy()
+        print "Calculating Momentum..."
+        result = talib.MOM(values)
+        values = [result]
+        columns = [prefix+"MOM"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetRSI(self,dfQuote,prefix):
+    def GetRSI(self,values,prefix):
         prefix = prefix+"_"
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Relative Strength Index (RSI)..."
-            prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            result = talib.RSI(dfQuote['Norm_Adjusted_Close'].values)
-            values = [result]
-            columns = [prefix+"RSI"]
-            df = Util().BuildDataFrame(columns,values).copy()
+        print "Calculating Relative Strength Index (RSI)..."          
+        result = talib.RSI(values)
+        values = [result]
+        columns = [prefix+"RSI"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
 
     #Standard - fastperiod=12, slowperiod=26, signalperiod=9   
-    def GetMACD(self,dfQuote,prefix):
-        prefix = prefix+"_"
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Moving Average Convergence/Divergence (MACD)..."
-            prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            macd, macdsignal, macdhist = talib.MACD(dfQuote['Norm_Adjusted_Close'].values)
-            values = [macd,macdsignal,macdhist]
-            columns = [prefix+"MACD",prefix+"MACD_SIGNAL",prefix+"MACD_HIST"]
-            df = Util().BuildDataFrame(columns,values).copy()
+    def GetMACD(self,values,prefix):
+        prefix = prefix+"_"    
+        print "Calculating Moving Average Convergence/Divergence (MACD)..."
+        macd, macdsignal, macdhist = talib.MACD(values)
+        values = [macd,macdsignal,macdhist]
+        columns = [prefix+"MACD",prefix+"MACD_SIGNAL",prefix+"MACD_HIST"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
 
       
@@ -88,30 +77,39 @@ class TechnicalIndicators:
         if 'Norm_Adjusted_Close' in dfQuote.columns:
             print "Calculating Sthocastic Indicator..."
             prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            slowk, slowd = talib.STOCH(dfQuote['High'].values,dfQuote['Low'].values,dfQuote['Norm_Adjusted_Close'].values)
+            slowk, slowd = talib.STOCH(dfQuote['High'].values,dfQuote['Low'].values,values)
             values = [slowk,slowd]
             columns = [prefix+"SLOWK",prefix+"SLOWD"]
             df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetIndicators(self,dfQuotes,outputFolder="",writeInFile = False):
-        dfs = [dfQuotes]
-        dfs.append(self.GetSMA(dfQuotes.copy(),15,"Short"))
-        dfs.append(self.GetSMA(dfQuotes.copy(),30,"Middle"))
-        dfs.append(self.GetSMA(dfQuotes.copy(),50,"Long"))
-        dfs.append(self.GetEMA(dfQuotes.copy(),15,"Short"))
-        dfs.append(self.GetEMA(dfQuotes.copy(),30,"Middle"))
-        dfs.append(self.GetEMA(dfQuotes.copy(),50,"Long"))
-        dfs.append(self.GetMomentum(dfQuotes.copy(),"Std"))
-        dfs.append( self.GetRSI(dfQuotes.copy(),"Std"))
-        dfs.append(self.GetMACD(dfQuotes.copy(),"Std"))
-        dfs.append(self.GetStochastic(dfQuotes.copy(),"Std"))
-        dfs.append(self.GetBoillingerBands(dfQuotes.copy(),10,1.9,"Short"))
-        dfs.append(self.GetBoillingerBands(dfQuotes.copy(),20,2,"Middle"))
-        dfs.append(self.GetBoillingerBands(dfQuotes.copy(),50,2.1,"Long"))
+    def GetIndicators(self,values,ticker,outputFolder="",writeInFile = False):
+        dfs = []
+        dfs.append(self.GetSMA(values,15,"Short"))
+        dfs.append(self.GetSMA(values,30,"Middle"))
+        dfs.append(self.GetSMA(values,50,"Long"))
+        dfs.append(self.GetEMA(values,15,"Short"))
+        dfs.append(self.GetEMA(values,30,"Middle"))
+        dfs.append(self.GetEMA(values,50,"Long"))
+        dfs.append(self.GetMomentum(values,"Std"))
+        dfs.append( self.GetRSI(values,"Std"))
+        dfs.append(self.GetMACD(values,"Std"))
+        #dfs.append(self.GetStochastic(dfQuotes.copy(),"Std"))
+        dfs.append(self.GetBoillingerBands(values,10,1.9,"Short"))
+        dfs.append(self.GetBoillingerBands(values,20,2,"Middle"))
+        dfs.append(self.GetBoillingerBands(values,50,2.1,"Long"))
         dfResult = pd.concat(dfs,axis=1)
         if(writeInFile):
-            Util().WriteDataFrame(dfResult,outputFolder,dfQuotes['Ticker'][0]+".csv")
+            Util().WriteDataFrame(dfResult,outputFolder,ticker+".csv")
+        return dfResult
+
+    def GetIndicatorsFromDF(self,dfQuotes,outputFolder="",writeInFile = False):
+        ticker = dfQuotes['Ticker'][0]
+        dfIndicators = self.GetIndicators(dfQuotes['Norm_Adjusted_Close'].values,dfQuotes['Ticker'][0],outputFolder,False)
+        dfs = [dfQuotes,dfIndicators]
+        dfResult = pd.concat(dfs,axis=1)
+        if(writeInFile):
+            Util().WriteDataFrame(dfResult,outputFolder,ticker+".csv")
         return dfResult
 
 def main():
@@ -121,7 +119,7 @@ def main():
     files = Util().GetFilesFromFolder(inputFolder,"csv")
     for file in files:
         df = pd.read_csv(file)
-        indicators.GetIndicators(df,outputFolder,True)
+        indicators.GetIndicatorsFromDF(df.copy(),outputFolder,True)
 
 if  __name__ =='__main__': main() 
 

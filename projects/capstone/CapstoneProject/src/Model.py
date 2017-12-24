@@ -12,9 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.decomposition import PCA
-
+import math
+from TechinalIndicators import TechnicalIndicators
 class Model:
-    
+  
     def GetTrainPredictData(self,df,featureColumns,targetColumn,trainSize=0.8,recordsToPredict = 1):
        
         dfFeatures = df[featureColumns].shift(-recordsToPredict).dropna() ## Drops last row in order to predict the next price using the previous indicators
@@ -54,17 +55,17 @@ class Model:
     def build_models(self):
         models = {}
         models['Linear'] = LinearRegression()
-        models['Ridge'] = Ridge()
-        models['Huber'] = HuberRegressor()
-        models['Lasso'] = Lasso()
-        models['ElasticNet'] = ElasticNet()
+       #models['Ridge'] = Ridge()
+        #models['Huber'] = HuberRegressor()
+        #models['Lasso'] = Lasso()
+        #models['ElasticNet'] = ElasticNet()
         #models['KNNRegresor'] = KNeighborsRegressor()
         return models
 
     #Estimar o preço pra T+1 com base em T-N+1 (fazer um shift de um dia no dataframe)
     #Com esse dado, calcular os indicadores e fazer o processo novamente, movendo mais um dia pra frente no dataframe
     #Fazer isso até chegar no dia desejado
-    def GetBestEstimatorsShiftStrategy(self,df,recordsToPredict,outputfolder):
+    def GetBestEstimatorsShiftStrategy(self,df,recordsToPredict,outputfolder="",writeInFile=True):
         print "Days to Predict: {}".format(recordsToPredict)
         models = self.build_models()
         params = self.build_params()
@@ -76,8 +77,11 @@ class Model:
         featureColumns = list(df.columns.values)
         featureColumns = featureColumns[8:]
         dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
-        dfResult = pd.DataFrame(columns=['Actual'])
-        dfResult['Actual'] = dfTest['Adjusted_Close'].shift(recordsToPredict).dropna().values  
+        dfResult = pd.DataFrame(columns=['Date','Actual'])
+        dfResult['Actual'] = dfTest['Adjusted_Close'].shift(recordsToPredict).dropna().values 
+        dfResult['Date'] = dfTest['Date'].shift(recordsToPredict).dropna().values
+        Xtest = dfTest[featureColumns].shift(-recordsToPredict).dropna().values
+        yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
         X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(dfTrain.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
         for key in models:
             print "Tuning {} model...".format(key)
@@ -85,9 +89,7 @@ class Model:
             b_estimator, b_params, b_score = self.fit_model(models.get(key),params.get(key),Xtrain,ytrain)
             models[key] = b_estimator
             params[key] = b_params
-            scores[key] = b_score          
-            Xtest = dfTest[featureColumns].shift(-recordsToPredict).dropna().values
-            yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
+            scores[key] = b_score                    
             pred = b_estimator.predict(Xtest)
             reScaled = pred*df['Adjusted_Close'][0]
             dfResult[key] = reScaled
@@ -112,9 +114,45 @@ class Model:
             print "MSE Train Score {}".format(metrics['MSE Train Score'])
             print "MSE Test Score {}".format(metrics['MSE Test Score'])
 
-        Util().WriteDataFrame(dfResult,outputfolder,str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
-        Util().WriteDataFrame(dfMetrics,outputfolder,"Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
+        if(writeInFile):
+            Util().WriteDataFrame(dfResult,outputfolder,str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
+            Util().WriteDataFrame(dfMetrics,outputfolder,"Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
+        return models, params
     
+    def GetBestEstimatorNexDayStrategy(self,df,recordsToPredict,outputfolder="",writeInFile=True):
+        models,params = Model().GetBestEstimatorsShiftStrategy(df,1,writeInFile=False)
+        scores = {}
+        metrics = {}
+        split =  np.array_split(df, 2)
+        dfTrain = split[0]
+        dfTest =  split[1]
+        featureColumns = list(df.columns.values)
+        featureColumns = featureColumns[8:]
+        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
+        dfResult = pd.DataFrame(columns=['Date','Actual'])
+        dfResult['Actual'] = dfTest['Adjusted_Close'].shift(1).dropna().values 
+        dfResult['Date'] = dfTest['Date'].shift(1).dropna().values
+        Xtest = dfTest[featureColumns].shift(-1).dropna().values
+        yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
+        #Predicts for the first day and broadcast the prediction for the other days
+        #Tem que ter um numero minimo de dados pra conseguir calcuar os indicadores (pelo menos uns 50 ou 100 registros pra trás)
+        for key in models:
+            print "Predicting Prices using Next Day Strategy for model ".format(key)
+            #Predicts for the first day and broadcast the prediction for the other days
+            model = models[key]
+            features = Xtest[0,:]
+            predictons = []
+            pred = model.predict(features)
+            predictons.append(pred[0])
+            for i in range(1,features.shape[0]):
+                features = TechnicalIndicators().GetIndicators(predictons[len(predictons)-1],"")
+                pred = pred = model.predict(features.values)
+                predictons.append(pred[0])
+
+            reScaled = pred*df['Adjusted_Close'][0]
+
+
+
     def GetPCs(self,df):
         print "PCA..."
         #Re-Scaling and Normalizing data
@@ -139,7 +177,8 @@ def main():
         print "File: {}".format(file)
         df = pd.read_csv(file)
         for interval in intervals:
-            Model().GetBestEstimatorsShiftStrategy(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
+            #Model().GetBestEstimatorsShiftStrategy(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
+            Model().GetBestEstimatorNexDayStrategy(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
 
 
 if  __name__ =='__main__': main() 
