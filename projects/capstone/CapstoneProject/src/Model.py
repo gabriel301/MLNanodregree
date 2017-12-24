@@ -64,7 +64,7 @@ class Model:
     #Estimar o preço pra T+1 com base em T-N+1 (fazer um shift de um dia no dataframe)
     #Com esse dado, calcular os indicadores e fazer o processo novamente, movendo mais um dia pra frente no dataframe
     #Fazer isso até chegar no dia desejado
-    def GetBestEstimators(self,df,recordsToPredict,outputfolder):
+    def GetBestEstimatorsShiftStrategy(self,df,recordsToPredict,outputfolder):
         print "Days to Predict: {}".format(recordsToPredict)
         models = self.build_models()
         params = self.build_params()
@@ -112,8 +112,8 @@ class Model:
             print "MSE Train Score {}".format(metrics['MSE Train Score'])
             print "MSE Test Score {}".format(metrics['MSE Test Score'])
 
-        Util().WritePrediction(dfResult,outputfolder,"",str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
-        Util().WritePrediction(dfMetrics,outputfolder,"","Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
+        Util().WriteDataFrame(dfResult,outputfolder,str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
+        Util().WriteDataFrame(dfMetrics,outputfolder,"Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
     
     def GetPCs(self,df):
         print "PCA..."
@@ -139,7 +139,7 @@ def main():
         print "File: {}".format(file)
         df = pd.read_csv(file)
         for interval in intervals:
-            Model().GetBestEstimators(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader')
+            Model().GetBestEstimatorsShiftStrategy(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
 
 
 if  __name__ =='__main__': main() 

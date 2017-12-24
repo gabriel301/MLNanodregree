@@ -51,17 +51,17 @@ class Util:
             dfFiltered = pd.merge(dfDates, df, on='Date', how='left')
             return dfFiltered
 
-    def WritePrediction(self, df, outputfolder,modelname,filename):
+    def BuildDataFrame(self,columnNames,values,include_index=False,fillna=True):
+        df = pd.DataFrame.from_items(zip(columnNames, values))
+        if(fillna):
+            df.fillna(method='ffill',inplace=True)
+            df.fillna(method='bfill',inplace=True)
+        return df
+
+    def WriteDataFrame(self, df, outputfolder,filename,include_index=False):
         Util().CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Data")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Predictions")
-        Util().CreateFolder(outputPath)
-        if modelname:
-            outputPath = os.path.join(outputPath,modelname)
-            Util().CreateFolder(outputPath)
         outputfileName= str(ntpath.basename(filename))
-        outputfolder = os.path.join(outputPath,outputfileName)
-        print "Writing Predictions..."
-        df.to_csv(outputfolder,index=False)
-        print "Done!"
+        outputPath = os.path.join(outputfolder,outputfileName)
+        print "Writing Dataframe..."
+        df.to_csv(outputPath,index=include_index)
+        print "File Created at {}".format(outputPath)
