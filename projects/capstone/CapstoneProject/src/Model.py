@@ -43,10 +43,10 @@ class Model:
     def build_params(self):
         models = {}
         models['Linear'] = {'normalize': [True, False],'fit_intercept': [True, False],'n_jobs':[-1]}
-        models['Ridge'] = {'alpha': [0.1, 0.01,0.001], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0]}
-        models['Huber'] = {'alpha': [0.1, 0.01,0.001], 'epsilon': [1.1,1.35,1.5],'fit_intercept': [False]}
-        models['Lasso'] = {'alpha': [0.1, 0.01,0.001], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random']}
-        models['ElasticNet'] = {'alpha': [1.0,1.1, 1.5], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random'],'l1_ratio':[0.5,1]}
+        models['Ridge'] = {'alpha': [0.00015,0.0002,0.0001,0.00009], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0]}
+        models['Huber'] = {'alpha': [0.01,0.001,0.0001], 'epsilon': [1.1,1.35,1.5],'fit_intercept': [False]}
+        models['Lasso'] = {'alpha': [0.00009,0.0002,0.0001,0.00015], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random']}
+        models['ElasticNet'] = {'alpha': [1.0,1.1, 1.5], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random'],'l1_ratio':[0.25,0.5,1]}
         models['KNNRegresor'] = {'n_neighbors': [3, 5, 7,10], 'weights': ['uniform', 'distance'],'p': [1, 2], 'n_jobs': [-1],'algorithm': ['ball_tree', 'kd_tree']}
         
         return models
@@ -58,7 +58,7 @@ class Model:
         models['Huber'] = HuberRegressor()
         models['Lasso'] = Lasso()
         models['ElasticNet'] = ElasticNet()
-        models['KNNRegresor'] = KNeighborsRegressor()
+        #models['KNNRegresor'] = KNeighborsRegressor()
         return models
 
     #Estimar o preço pra T+1 com base em T-N+1 (fazer um shift de um dia no dataframe)
@@ -75,7 +75,7 @@ class Model:
         dfTest =  split[1]
         featureColumns = list(df.columns.values)
         featureColumns = featureColumns[8:]
-        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Params'])
+        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
         dfResult = pd.DataFrame(columns=['Actual'])
         dfResult['Actual'] = dfTest['Adjusted_Close'].shift(recordsToPredict).dropna().values  
         X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(dfTrain.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
@@ -90,13 +90,22 @@ class Model:
             yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
             pred = b_estimator.predict(Xtest)
             reScaled = pred*df['Adjusted_Close'][0]
-            dfResult[key] = reScaled  
+            dfResult[key] = reScaled
+            dfResult[key + " % diff"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
             metrics['Model'] = key
             metrics['R2 Training Score'] = b_estimator.score(X_train,y_train)
             metrics['R2 Test Score'] = b_estimator.score(Xtest,yTest)
             metrics['MSE Train Score'] = mean_squared_error(y_train,b_estimator.predict(X_train))
             metrics['MSE Test Score'] = mean_squared_error(yTest,pred)
             metrics['Params'] = str(params[key])
+            metrics['Max % Diff'] = dfResult[key + " % diff"].values.max()
+            metrics['Min % Diff'] = dfResult[key + " % diff"].values.min()
+            metrics['Mean % Diff'] = dfResult[key + " % diff"].values.mean()
+            metrics['Std % Diff'] = dfResult[key + " % diff"].values.std()
+            metrics['Q1 % Diff'] = dfResult[key + " % diff"].quantile(0.25)
+            metrics['Q2 % Diff'] = dfResult[key + " % diff"].quantile(0.50)
+            metrics['Q3 % Diff'] = dfResult[key + " % diff"].quantile(0.75)
+            metrics['IQR % Diff'] = metrics['Q3 % Diff'] - metrics['Q1 % Diff']
             dfMetrics = dfMetrics.append(metrics,ignore_index=True)
             print "R2 Training Score {}".format(metrics['R2 Training Score'])
             print "R2 Test Score {}".format(metrics['R2 Test Score'])
