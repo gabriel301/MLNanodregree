@@ -11,9 +11,10 @@ class TechnicalIndicators:
     #ShortTerm - 10 days, 1.9 std
     #Standard - 20 days, 2 std
     #LongTerm - 50 days, 2.1 std
-    def GetBoillingerBands(self,values,period,std,prefix):
+    def GetBoillingerBands(self,values,period,std,prefix,supressMessage = True):
         prefix = prefix+"_"
-        print "Calculating Billinger Bands..."
+        if not supressMessage:
+            print "Calculating Billinger Bands..."
         upperband, middleband, lowerband = talib.BBANDS(values,period,std)
         values = [lowerband,middleband,upperband]
         columns = [prefix+"Lower_BBand",prefix+"Mid_BBand",prefix+"Upper_BBand"]
@@ -23,9 +24,10 @@ class TechnicalIndicators:
     #Short Term - 15 days
     #Standard - 30 days
     #Long Term - 60 days
-    def GetSMA(self,values,period,prefix):
+    def GetSMA(self,values,period,prefix,supressMessage = True):
         prefix = prefix+"_"
-        print "Calculating Simple Moving Average..."
+        if not supressMessage:
+            print "Calculating Simple Moving Average..."
         result = talib.SMA(values,period)
         values = [result]
         columns = [prefix+"SMA"]
@@ -35,27 +37,30 @@ class TechnicalIndicators:
     #Short Term - 15 days
     #Standard - 30 days
     #Long Term - 60 days
-    def GetEMA(self,values,period,prefix):
+    def GetEMA(self,values,period,prefix,supressMessage = True):
         prefix = prefix+"_"      
-        print "Calculating Exponential Moving Average..."
+        if not supressMessage:
+            print "Calculating Exponential Moving Average..."
         result = talib.EMA(values,period)
         values = [result]
         columns = [prefix+"EMA"]
         df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetMomentum(self,values,prefix):
+    def GetMomentum(self,values,prefix,supressMessage):
         prefix = prefix+"_"
-        print "Calculating Momentum..."
+        if not supressMessage:
+            print "Calculating Momentum..."
         result = talib.MOM(values)
         values = [result]
         columns = [prefix+"MOM"]
         df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetRSI(self,values,prefix):
+    def GetRSI(self,values,prefix,supressMessage):
         prefix = prefix+"_"
-        print "Calculating Relative Strength Index (RSI)..."          
+        if not supressMessage:
+            print "Calculating Relative Strength Index (RSI)..."          
         result = talib.RSI(values)
         values = [result]
         columns = [prefix+"RSI"]
@@ -63,9 +68,10 @@ class TechnicalIndicators:
         return df
 
     #Standard - fastperiod=12, slowperiod=26, signalperiod=9   
-    def GetMACD(self,values,prefix):
-        prefix = prefix+"_"    
-        print "Calculating Moving Average Convergence/Divergence (MACD)..."
+    def GetMACD(self,values,prefix,supressMessage):
+        prefix = prefix+"_"
+        if not supressMessage:
+            print "Calculating Moving Average Convergence/Divergence (MACD)..."
         macd, macdsignal, macdhist = talib.MACD(values)
         values = [macd,macdsignal,macdhist]
         columns = [prefix+"MACD",prefix+"MACD_SIGNAL",prefix+"MACD_HIST"]
@@ -83,29 +89,29 @@ class TechnicalIndicators:
             df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetIndicators(self,values,ticker,outputFolder="",writeInFile = False):
+    def GetIndicators(self,values,ticker,outputFolder="",writeInFile = False, supressMessage = True):
         dfs = []
-        dfs.append(self.GetSMA(values,15,"Short"))
-        dfs.append(self.GetSMA(values,30,"Middle"))
-        dfs.append(self.GetSMA(values,50,"Long"))
-        dfs.append(self.GetEMA(values,15,"Short"))
-        dfs.append(self.GetEMA(values,30,"Middle"))
-        dfs.append(self.GetEMA(values,50,"Long"))
-        dfs.append(self.GetMomentum(values,"Std"))
-        dfs.append( self.GetRSI(values,"Std"))
-        dfs.append(self.GetMACD(values,"Std"))
+        dfs.append(self.GetSMA(values,15,"Short",supressMessage))
+        dfs.append(self.GetSMA(values,30,"Middle",supressMessage))
+        dfs.append(self.GetSMA(values,50,"Long",supressMessage))
+        dfs.append(self.GetEMA(values,15,"Short",supressMessage))
+        dfs.append(self.GetEMA(values,30,"Middle",supressMessage))
+        dfs.append(self.GetEMA(values,50,"Long",supressMessage))
+        dfs.append(self.GetMomentum(values,"Std",supressMessage))
+        dfs.append( self.GetRSI(values,"Std",supressMessage))
+        dfs.append(self.GetMACD(values,"Std",supressMessage))
         #dfs.append(self.GetStochastic(dfQuotes.copy(),"Std"))
-        dfs.append(self.GetBoillingerBands(values,10,1.9,"Short"))
-        dfs.append(self.GetBoillingerBands(values,20,2,"Middle"))
-        dfs.append(self.GetBoillingerBands(values,50,2.1,"Long"))
+        dfs.append(self.GetBoillingerBands(values,10,1.9,"Short",supressMessage))
+        dfs.append(self.GetBoillingerBands(values,20,2,"Middle",supressMessage))
+        dfs.append(self.GetBoillingerBands(values,50,2.1,"Long",supressMessage))
         dfResult = pd.concat(dfs,axis=1)
         if(writeInFile):
             Util().WriteDataFrame(dfResult,outputFolder,ticker+".csv")
         return dfResult
 
-    def GetIndicatorsFromDF(self,dfQuotes,outputFolder="",writeInFile = False):
+    def GetIndicatorsFromDF(self,dfQuotes,outputFolder="",writeInFile = False,supressMessages = False):
         ticker = dfQuotes['Ticker'][0]
-        dfIndicators = self.GetIndicators(dfQuotes['Norm_Adjusted_Close'].values,dfQuotes['Ticker'][0],outputFolder,False)
+        dfIndicators = self.GetIndicators(dfQuotes['Norm_Adjusted_Close'].values,dfQuotes['Ticker'][0],outputFolder,False,supressMessages)
         dfs = [dfQuotes,dfIndicators]
         dfResult = pd.concat(dfs,axis=1)
         if(writeInFile):
