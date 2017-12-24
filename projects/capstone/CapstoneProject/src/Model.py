@@ -3,6 +3,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression,Ridge,HuberRegressor,Lasso,ElasticNet
 from sklearn.neighbors import KNeighborsRegressor
 from Util import Util
@@ -14,7 +15,7 @@ from sklearn.decomposition import PCA
 
 class Model:
     
-    def GetTrainPredictData(self,df,featureColumns,targetColumn,trainSize=0.8,recordsToPredict = 0):
+    def GetTrainPredictData(self,df,featureColumns,targetColumn,trainSize=0.8,recordsToPredict = 1):
        
         dfFeatures = df[featureColumns].shift(-recordsToPredict).dropna() ## Drops last row in order to predict the next price using the previous indicators
         dfTarget = df[targetColumn].shift(recordsToPredict).dropna() #Shift the dataset to "align" with feature datase
@@ -64,14 +65,19 @@ class Model:
     #Com esse dado, calcular os indicadores e fazer o processo novamente, movendo mais um dia pra frente no dataframe
     #Fazer isso até chegar no dia desejado
     def GetBestEstimators(self,df,recordsToPredict,outputfolder):
+        print "Days to Predict: {}".format(recordsToPredict)
         models = self.build_models()
         params = self.build_params()
         scores = {}
+        metrics = {}
         split =  np.array_split(df, 2)
         dfTrain = split[0]
         dfTest =  split[1]
         featureColumns = list(df.columns.values)
         featureColumns = featureColumns[8:]
+        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Params'])
+        dfResult = pd.DataFrame(columns=['Actual'])
+        dfResult['Actual'] = dfTest['Adjusted_Close'].shift(recordsToPredict).dropna().values  
         X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(dfTrain.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
         for key in models:
             print "Tuning {} model...".format(key)
@@ -79,15 +85,26 @@ class Model:
             b_estimator, b_params, b_score = self.fit_model(models.get(key),params.get(key),Xtrain,ytrain)
             models[key] = b_estimator
             params[key] = b_params
-            scores[key] = b_estimator.score(X_test,y_test)
-            Xtest = dfTest[featureColumns].values
-            yTest = dfTest['Adjusted_Close'].values
+            scores[key] = b_score          
+            Xtest = dfTest[featureColumns].shift(-recordsToPredict).dropna().values
+            yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
             pred = b_estimator.predict(Xtest)
             reScaled = pred*df['Adjusted_Close'][0]
-            dfResult = pd.DataFrame(reScaled,columns=['Predicted'])
-            dfResult['Actual'] = yTest
-            Util().WritePrediction(dfResult,outputfolder,key,str(df["Ticker"][0])+".csv")
+            dfResult[key] = reScaled  
+            metrics['Model'] = key
+            metrics['R2 Training Score'] = b_estimator.score(X_train,y_train)
+            metrics['R2 Test Score'] = b_estimator.score(Xtest,yTest)
+            metrics['MSE Train Score'] = mean_squared_error(y_train,b_estimator.predict(X_train))
+            metrics['MSE Test Score'] = mean_squared_error(yTest,pred)
+            metrics['Params'] = str(params[key])
+            dfMetrics = dfMetrics.append(metrics,ignore_index=True)
+            print "R2 Training Score {}".format(metrics['R2 Training Score'])
+            print "R2 Test Score {}".format(metrics['R2 Test Score'])
+            print "MSE Train Score {}".format(metrics['MSE Train Score'])
+            print "MSE Test Score {}".format(metrics['MSE Test Score'])
 
+        Util().WritePrediction(dfResult,outputfolder,"",str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
+        Util().WritePrediction(dfMetrics,outputfolder,"","Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
     
     def GetPCs(self,df):
         print "PCA..."
@@ -107,10 +124,13 @@ class Model:
         return reduced_df
 
 def main():
-    file = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
-    print "File: {}".format(file[0])
-    df = pd.read_csv(file[0])
-    Model().GetBestEstimators(df,1,'C:\Users\Augus\Desktop\TesteDonwloader\Data')
+    files = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
+    intervals = [1,7,15,30,60,120]
+    for file in files:
+        print "File: {}".format(file)
+        df = pd.read_csv(file)
+        for interval in intervals:
+            Model().GetBestEstimators(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader')
 
 
 if  __name__ =='__main__': main() 

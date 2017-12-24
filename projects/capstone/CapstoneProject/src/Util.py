@@ -57,8 +57,9 @@ class Util:
         Util().CreateFolder(outputPath)
         outputPath = os.path.join(outputPath,"Predictions")
         Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,modelname)
-        Util().CreateFolder(outputPath)
+        if modelname:
+            outputPath = os.path.join(outputPath,modelname)
+            Util().CreateFolder(outputPath)
         outputfileName= str(ntpath.basename(filename))
         outputfolder = os.path.join(outputPath,outputfileName)
         print "Writing Predictions..."
