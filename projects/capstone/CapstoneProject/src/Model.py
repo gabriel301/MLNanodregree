@@ -132,8 +132,9 @@ class Model:
         dfResult = pd.DataFrame(columns=['Date','Actual'])
         dfResult['Actual'] = dfTest['Adjusted_Close'].shift(1).dropna().values 
         dfResult['Date'] = dfTest['Date'].shift(1).dropna().values
-        Xtest = dfTest[featureColumns].shift(-1).dropna().values
-        yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
+        Xtest = dfTest[featureColumns].shift(-1).dropna().values 
+        pricesIndicator = dfTest['Norm_Adjusted_Close'].shift(-1).dropna().values[0:50] #Get the indicators for last 50 days
+        yTest = dfTest['Norm_Adjusted_Close'].shift(1).dropna().values
         #Predicts for the first day and broadcast the prediction for the other days
         #Tem que ter um numero minimo de dados pra conseguir calcuar os indicadores (pelo menos uns 50 ou 100 registros pra trás)
         for key in models:
@@ -143,11 +144,16 @@ class Model:
             features = Xtest[0,:]
             predictons = []
             pred = model.predict(features)
+            features = np.append(features,pred[0])
+            features = np.delete(features, [0])
             predictons.append(pred[0])
             for i in range(1,features.shape[0]):
-                features = TechnicalIndicators().GetIndicators(predictons[len(predictons)-1],"")
-                pred = pred = model.predict(features.values)
+                features = TechnicalIndicators().GetIndicators(features,"")
+                pred = model.predict(features.values)
+                features = np.concatenate(features,pred)
+                numpy.delete(features, 0)    
                 predictons.append(pred[0])
+
 
             reScaled = pred*df['Adjusted_Close'][0]
 

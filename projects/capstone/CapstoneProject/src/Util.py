@@ -54,7 +54,7 @@ class Util:
     def BuildDataFrame(self,columnNames,values,include_index=False,fillna=True):
         df = pd.DataFrame.from_items(zip(columnNames, values))
         if(fillna):
-            df.fillna(method='ffill',inplace=True)
+            #df.fillna(method='ffill',inplace=True)
             df.fillna(method='bfill',inplace=True)
         return df
 
