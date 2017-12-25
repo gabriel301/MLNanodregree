@@ -91,6 +91,7 @@ class TechnicalIndicators:
         return df
 
     def GetIndicators(self,values,ticker,outputFolder="",writeInFile = False, supressMessage = True):
+        outputFolder = os.path.join(outputFolder,"Data/Historical/Indicators")
         dfs = []
         dfs.append(self.GetSMA(values,15,"Short",supressMessage))
         dfs.append(self.GetSMA(values,30,"Middle",supressMessage))
@@ -112,6 +113,7 @@ class TechnicalIndicators:
 
     def GetIndicatorsFromDF(self,dfQuotes,outputFolder="",writeInFile = False,supressMessages = False):
         ticker = dfQuotes['Ticker'][0]
+        outputFolder = os.path.join(outputFolder,"Data/Historical/Indicators")
         dfIndicators = self.GetIndicators(dfQuotes['Norm_Adjusted_Close'].values,dfQuotes['Ticker'][0],outputFolder,False,supressMessages)
         dfs = [dfQuotes,dfIndicators]
         dfResult = pd.concat(dfs,axis=1)

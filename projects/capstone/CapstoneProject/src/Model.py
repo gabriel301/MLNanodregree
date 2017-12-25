@@ -189,15 +189,15 @@ class Model:
         dfFiltered = Util().FilterDataFrameByDate(df.copy(),startdate,enddate)
         featureColumns = list(df.columns.values)
         featureColumns = featureColumns[9:]
-        model = self.build_models[modelName]
-        params = self.build_params[modelName]  
+        model = self.build_models().get(modelName)
+        params = self.build_params().get(modelName)
         X_train, X_test, y_train, y_test = self.GetTrainPredictData(dfFiltered.copy(),featureColumns,['Norm_Adjusted_Close'],0.9,periodToPredict)
-        b_estimator, _ ,_ = self.fit_model(models.get(key),params.get(key),X_train.values,y_train.values)
-        valueToPredict = dfFiltered[:-1,featureColumns].values
+        b_estimator, _ ,_ = self.fit_model(model,params,X_train.values,y_train.values)
+        valueToPredict = dfFiltered[featureColumns].iloc[-1].values
         print 'Predicting...'
         prediction = b_estimator.predict(valueToPredict)
         reScaled = prediction * scale
-        return reScaled
+        return reScaled[0]
 
 def main():
     files = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
