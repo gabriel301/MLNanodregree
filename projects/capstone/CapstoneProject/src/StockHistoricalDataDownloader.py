@@ -18,13 +18,8 @@ class StockHistoricalDataDownloader:
     def GetHistoricalDataFromAlphaVantage(self,stockSymbols,outputfolder,identifier,replace):
         total = len(stockSymbols)
         count=1
-        apiKey = "2LZWQ360LNACRFVZ"
-        Util().CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Download")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Historical")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"AlphaVantage")
+        apiKey = ""
+        outputPath = os.path.join(outputfolder,"Data/Download/Historical/AlphaVantage")
         Util().CreateFolder(outputPath)
         notFoundSymbols = []
         if(identifier):
@@ -76,13 +71,7 @@ class StockHistoricalDataDownloader:
     def GetHistoricalDataFromYahoo(self,stockSymbols,outputfolder,identifier,replace):
         total = len(stockSymbols)
         count=1
-
-        Util().CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Download")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Historical")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Yahoo")
+        outputPath = os.path.join(outputfolder,"Data/Download/Historical/Yahoo")
         Util().CreateFolder(outputPath)
     
         notFoundSymbols = []
@@ -182,15 +171,8 @@ class StockHistoricalDataDownloader:
         print "{} dates loaded.".format(len(listDates))
         return listDates
 
-    def GetCleanDataframe(self,intervalDates,inputfolder,outputfolder):
-        Util().CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Data")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Historical")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Quotes")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Cleaned")
+    def GetCleanDataframe(self,inputfolder,outputfolder):
+        outputPath = os.path.join(outputfolder,"Data/Historical/Quotes/Cleaned")
         Util().CreateFolder(outputPath)
         files = Util().GetFilesFromFolder(inputfolder,'csv')
         total = len(files)
@@ -214,14 +196,7 @@ class StockHistoricalDataDownloader:
 
     #Normalize prices to start from 1
     def GetNormalizedDataframe(self,inputfolder,outputfolder):
-        Util().CreateFolder(outputfolder)
-        outputPath = os.path.join(outputfolder,"Data")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Historical")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Quotes")
-        Util().CreateFolder(outputPath)
-        outputPath = os.path.join(outputPath,"Normalized")
+        outputPath = os.path.join(outputfolder,"Data/Historical/Quotes/Normalized")
         Util().CreateFolder(outputPath)
         files = Util().GetFilesFromFolder(inputfolder,'csv')
         total = len(files)
@@ -230,11 +205,6 @@ class StockHistoricalDataDownloader:
             dfHistorical = pd.read_csv(stockfile)
             if 'Date' in dfHistorical.columns:
                 print "Normalizing data from file {} ({} of {})".format(stockfile,count,total)
-                ##dfNormalized = dfHistorical.drop('Date', axis=1).drop('Ticker', axis=1)
-                ##dfNormalized = dfNormalized/dfNormalized.ix[0,:]
-                ##dfNormalized['Date'] = dfHistorical["Date"]
-                ##dfNormalized['Ticker'] = dfHistorical["Ticker"]
-                ##dfNormalized = dfNormalized[['Date','Ticker','Open','High','Low','Close','Adjusted_Close','Volume']]
                 dfHistorical["Norm_Adjusted_Close"] = dfHistorical["Adjusted_Close"]/dfHistorical["Adjusted_Close"][0]
                 outputfileName = str(ntpath.basename(stockfile))
                 outputFile = os.path.join(outputPath,outputfileName)
@@ -242,6 +212,19 @@ class StockHistoricalDataDownloader:
                 count = count + 1
                 print "File created at {}".format(outputFile)
         return outputPath
+
+    def DownloadData(self,symbols,datasource,identifier,replace,outputfolder):
+       
+        if(datasource.lower() == 'y' ):
+            folderHistorical = self.GetHistoricalDataFromYahoo(symbols,outputfolder,identifier,replace)
+        else:
+            folderHistorical = self.GetHistoricalDataFromAlphaVantage(symbols,outputfolder,identifier,replace)
+    
+        quotesFolder = stocks.GetCleanDataframe(folderHistorical,outputfolder)
+        normalizedFolder = stocks.GetNormalizedDataframe(quotesFolder,outputfolder)
+
+        return normalizedFolder
+
 def main():
     
     epilog = "Sample Usage: symbols outputFolder"
@@ -249,7 +232,10 @@ def main():
                                      epilog=epilog, add_help=True)
 
     parser.add_argument('symbols', help='Stock Companies Symbols separeted by comma')
-    parser.add_argument('outputfolder', help='Folder that all historical stock prices will be downloaded.')
+    parser.add_argument('-o,--outputfolder', help='Folder that all historical stock prices will be downloaded.',const='a',
+                        default='./',
+                        action='store',
+                        nargs='?')
     parser.add_argument('-r','--replace', help='Replace files if exists',action="store_true")
     parser.add_argument('-i','--identifier', 
                         help='Exchange identifier. For instance, for Brazilian Exchange Bovespa, the identifier is SA'
@@ -303,8 +289,7 @@ def main():
         folderHistorical = stocks.GetHistoricalDataFromAlphaVantage(symbols,args.outputfolder,args.identifier,args.replace)
     
     
-    datesInterval = stocks.GetDateInterval(folderHistorical,startdate,enddate)
-    quotesFolder = stocks.GetCleanDataframe(datesInterval,folderHistorical,args.outputfolder)
+    quotesFolder = stocks.GetCleanDataframe(folderHistorical,args.outputfolder)
     normalizedFolder = stocks.GetNormalizedDataframe(quotesFolder,args.outputfolder)
     print "Done!"
 if  __name__ =='__main__': main() 

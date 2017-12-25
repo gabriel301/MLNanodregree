@@ -51,18 +51,17 @@ class Model:
         models['Huber'] = {'alpha': [0.01,0.001,0.0001], 'epsilon': [1.1,1.35,1.5],'fit_intercept': [False]}
         models['Lasso'] = {'alpha': [0.00009,0.0002,0.0001,0.00015], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random']}
         models['ElasticNet'] = {'alpha': [1.0,1.1, 1.5], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random'],'l1_ratio':[0.25,0.5,1]}
-        models['KNNRegresor'] = {'n_neighbors': [3, 5, 7,10], 'weights': ['uniform', 'distance'],'p': [1, 2], 'n_jobs': [-1],'algorithm': ['ball_tree', 'kd_tree']}
         
         return models
 
-    def build_models(self):
+    def build_models(self,predict = False):
         models = {}
-        models['Linear'] = LinearRegression()
-        #models['Ridge'] = Ridge()
-        #models['Huber'] = HuberRegressor()
-        #models['Lasso'] = Lasso()
-        #models['ElasticNet'] = ElasticNet()
-        #models['KNNRegresor'] = KNeighborsRegressor()
+        if not predict:
+            models['Linear'] = LinearRegression()
+            models['Ridge'] = Ridge()
+            models['Huber'] = HuberRegressor()
+            models['Lasso'] = Lasso()
+            models['ElasticNet'] = ElasticNet()            
         return models
 
     #Estimar o preço pra T+1 com base em T-N+1 (fazer um shift de um dia no dataframe)
@@ -138,7 +137,7 @@ class Model:
         #Predicts for the first day and broadcast the prediction for the other days
         #Tem que ter um numero minimo de dados pra conseguir calcuar os indicadores (pelo menos uns 50 ou 100 registros pra trás)
         for key in models:
-            print "Predicting next {} prices using Next Day Strategy for model {}".format(dfResult.shape[0],key)
+            print "Predicting next {} prices using Next Day Strategy for model {} and stock {}".format(dfResult.shape[0],key,df['Ticker'][0])
             #Predicts for the first day and broadcast the prediction for the other days
             model = models[key]
             features = TechnicalIndicators().GetIndicators(pricesIndicator,"")
@@ -182,22 +181,19 @@ class Model:
         return models, params
 
 
-    def GetPCs(self,df):
-        print "PCA..."
-        #Re-Scaling and Normalizing data
-        for column in df.columns:
-            df[column] = (df[column] - df[column].min())/(df[column].max() - df[column].min())
-            df[column] = stats.boxcox(df[column].values + 0.000001)[0]
-        pca = PCA(11)
-        pca = pca.fit(df,1)
-        ratio = pca.explained_variance_ratio_
-        variance = pca.explained_variance_
-        #float_formatter = lambda x: "%.2f" % x
-        #np.set_printoptions(formatter={'float_kind':float_formatter})
-        reduced_data = pca.transform(df)
-        reduced_df = pd.DataFrame(reduced_data, columns = ['Indicators_PC'])
-        
-        return reduced_df
+    def TrainAndPredict(self,modelName,df,startdate,enddate,periodToPredict):
+        scale = df['Adjusted_Close'][0]
+        dfFiltered = Util().FilterDataFrameByDate(df.copy(),startdate,enddate)
+        featureColumns = list(df.columns.values)
+        featureColumns = featureColumns[9:]
+        model = self.build_models[modelName]
+        params = self.build_params[modelName]  
+        X_train, X_test, y_train, y_test = self.GetTrainPredictData(dfFiltered.copy(),featureColumns,['Norm_Adjusted_Close'],0.9,periodToPredict)
+        b_estimator, _ ,_ = self.fit_model(models.get(key),params.get(key),X_train.values,y_train.values)
+        valueToPredict = dfFiltered[:-1,featureColumns].values
+        prediction = b_estimator.predict(valueToPredict)
+        reScaled = prediction * scale
+        return reScaled
 
 def main():
     files = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
@@ -206,8 +202,8 @@ def main():
         print "File: {}".format(file)
         df = pd.read_csv(file)
         for interval in intervals:
-            Model().GetBestEstimatorNexDayStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Next Day Strategy')
-            #Model().GetBestEstimatorsShiftStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
+            #Model().GetBestEstimatorNexDayStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Next Day Strategy')
+            Model().GetBestEstimatorsShiftStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
             
 
 
