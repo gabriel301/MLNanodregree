@@ -20,9 +20,12 @@ class Model:
        
         dfFeatures = df[featureColumns].shift(-recordsToPredict).dropna() ## Drops last row in order to predict the next price using the previous indicators
         dfTarget = df[targetColumn].shift(recordsToPredict).dropna() #Shift the dataset to "align" with feature datase
-        X_predict = dfFeatures.copy()
-        X_train, X_test, y_train, y_test = train_test_split(dfFeatures.values,dfTarget.values, train_size=trainSize, random_state = 0)
-        return  X_train, X_test, y_train, y_test, X_predict
+        trainRows = int(trainSize*dfFeatures.shape[0])
+        X_train = dfFeatures.iloc[0:trainRows,:]
+        y_train = dfTarget.iloc[0:trainRows,:]
+        X_test = dfFeatures.iloc[trainRows:,:]
+        y_test = dfTarget.iloc[trainRows:,:]
+        return  X_train, X_test, y_train, y_test
 
     #Performs grid search for the chosen model
     def fit_model(self,model,params,X, y):
@@ -55,7 +58,7 @@ class Model:
     def build_models(self):
         models = {}
         models['Linear'] = LinearRegression()
-       #models['Ridge'] = Ridge()
+        #models['Ridge'] = Ridge()
         #models['Huber'] = HuberRegressor()
         #models['Lasso'] = Lasso()
         #models['ElasticNet'] = ElasticNet()
@@ -71,34 +74,31 @@ class Model:
         params = self.build_params()
         scores = {}
         metrics = {}
-        split =  np.array_split(df, 2)
-        dfTrain = split[0]
-        dfTest =  split[1]
         featureColumns = list(df.columns.values)
-        featureColumns = featureColumns[9:]
         dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
         dfResult = pd.DataFrame(columns=['Date','Actual'])
-        dfResult['Actual'] = dfTest['Adjusted_Close'].shift(recordsToPredict).dropna().values 
-        dfResult['Date'] = dfTest['Date'].shift(recordsToPredict).dropna().values
-        Xtest = dfTest[featureColumns].shift(-recordsToPredict).dropna().values
-        yTest = dfTest['Norm_Adjusted_Close'].shift(recordsToPredict).dropna().values
-        X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(dfTrain.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
+        X_train, X_test, y_train, y_test = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
+        dfResult['Actual'] = X_test['Adjusted_Close']
+        dfResult['Date'] = X_test['Date']
+        featureColumns = featureColumns[9:]
+        X_train = X_train[featureColumns]
+        X_test = X_test[featureColumns]
         for key in models:
             print "Tuning {} model...".format(key)
             Xtrain, ytrain = X_train, y_train
-            b_estimator, b_params, b_score = self.fit_model(models.get(key),params.get(key),Xtrain,ytrain)
+            b_estimator, b_params, b_score = self.fit_model(models.get(key),params.get(key),Xtrain.values,ytrain.values)
             models[key] = b_estimator
             params[key] = b_params
             scores[key] = b_score                    
-            pred = b_estimator.predict(Xtest)
+            pred = b_estimator.predict(X_test)
             reScaled = pred*df['Adjusted_Close'][0]
             dfResult[key] = reScaled
             dfResult[key + " % diff"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
             metrics['Model'] = key
-            metrics['R2 Training Score'] = b_estimator.score(X_train,y_train)
-            metrics['R2 Test Score'] = b_estimator.score(Xtest,yTest)
-            metrics['MSE Train Score'] = mean_squared_error(y_train,b_estimator.predict(X_train))
-            metrics['MSE Test Score'] = mean_squared_error(yTest,pred)
+            metrics['R2 Training Score'] = b_estimator.score(X_train.values,y_train.values)
+            metrics['R2 Test Score'] = b_estimator.score(X_test.values,y_test)
+            metrics['MSE Train Score'] = mean_squared_error(y_train,b_estimator.predict(X_train.values))
+            metrics['MSE Test Score'] = mean_squared_error(y_test,pred)
             metrics['Params'] = str(params[key])
             metrics['Max % Diff'] = dfResult[key + " % diff"].values.max()
             metrics['Min % Diff'] = dfResult[key + " % diff"].values.min()
@@ -119,30 +119,26 @@ class Model:
             Util().WriteDataFrame(dfMetrics,outputfolder,"Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
         return models, params
     
-    def GetBestEstimatorNexDayStrategy(self,df,recordsToPredict,outputfolder="",writeInFile=True):
+    def GetBestEstimatorNexDayStrategy(self,df,recordsToPredict=1,outputfolder="",writeInFile=True):
         models,params = Model().GetBestEstimatorsShiftStrategy(df,1,writeInFile=False)
         scores = {}
         metrics = {}
-        #Separar o caso de teste para 
         featureColumns = list(df.columns.values)
-        featureColumns = featureColumns[9:]
-        X_train, X_test, y_train, y_test, X_predict = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.5,recordsToPredict)
-
-        #split =  np.array_split(df, 2)
-        #dfTrain = split[0]
-        #dfTest =  split[1]
-        
-        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
+        dfMetrics = pd.DataFrame(columns=['Model','R2 Test Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
         dfResult = pd.DataFrame(columns=['Date','Actual'])
-        dfResult['Actual'] = dfTest['Adjusted_Close'].shift(1).dropna().values 
-        dfResult['Date'] = dfTest['Date'].shift(1).dropna().values
-        Xtest = dfTest[featureColumns].shift(-1).dropna().values 
-        pricesIndicator = dfTest['Norm_Adjusted_Close'].shift(-1).dropna().values[0:120] #Get the indicators for last 50 days
-        yTest = dfTest['Norm_Adjusted_Close'].shift(1).dropna().values
+        X_train, X_test, y_train, y_test = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,1)
+        dfResult['Actual'] = (y_test.iloc[:,0]*df['Adjusted_Close'][0]).values[-recordsToPredict:]
+        dfResult['Date'] = X_test['Date'].values[-recordsToPredict:]
+        featureColumns = featureColumns[9:]
+        pricesIndicator = X_test['Norm_Adjusted_Close'].values[-120:] #Get the prices for the last 120 days in order to calculate indicators
+        X_train = X_train[featureColumns]
+        X_test = X_test[featureColumns]
+        y_test = y_test[-recordsToPredict:]
+         
         #Predicts for the first day and broadcast the prediction for the other days
         #Tem que ter um numero minimo de dados pra conseguir calcuar os indicadores (pelo menos uns 50 ou 100 registros pra trás)
         for key in models:
-            print "Predicting Prices using Next Day Strategy for model {}".format(key)
+            print "Predicting next {} prices using Next Day Strategy for model {}".format(dfResult.shape[0],key)
             #Predicts for the first day and broadcast the prediction for the other days
             model = models[key]
             features = TechnicalIndicators().GetIndicators(pricesIndicator,"")
@@ -161,10 +157,10 @@ class Model:
             dfResult[key] = reScaled
             dfResult[key + " % diff"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
             metrics['Model'] = key
-            metrics['R2 Training Score'] = model.score(X_train,y_train)
-            metrics['R2 Test Score'] = model.score(Xtest,yTest)
-            metrics['MSE Train Score'] = mean_squared_error(y_train,model.predict(X_train))
-            metrics['MSE Test Score'] = mean_squared_error(yTest,pred)
+            #metrics['R2 Training Score'] = model.score(X_train,y_train)
+            metrics['R2 Test Score'] = r2_score(y_test.values,predictons)
+            #metrics['MSE Train Score'] = mean_squared_error(y_train,model.predict(X_train))
+            metrics['MSE Test Score'] = mean_squared_error(y_test.values,predictons)
             metrics['Params'] = str(params[key])
             metrics['Max % Diff'] = dfResult[key + " % diff"].values.max()
             metrics['Min % Diff'] = dfResult[key + " % diff"].values.min()
@@ -175,9 +171,9 @@ class Model:
             metrics['Q3 % Diff'] = dfResult[key + " % diff"].quantile(0.75)
             metrics['IQR % Diff'] = metrics['Q3 % Diff'] - metrics['Q1 % Diff']
             dfMetrics = dfMetrics.append(metrics,ignore_index=True)
-            print "R2 Training Score {}".format(metrics['R2 Training Score'])
+            #print "R2 Training Score {}".format(metrics['R2 Training Score'])
             print "R2 Test Score {}".format(metrics['R2 Test Score'])
-            print "MSE Train Score {}".format(metrics['MSE Train Score'])
+            #print "MSE Train Score {}".format(metrics['MSE Train Score'])
             print "MSE Test Score {}".format(metrics['MSE Test Score'])
 
         if(writeInFile):
@@ -210,8 +206,9 @@ def main():
         print "File: {}".format(file)
         df = pd.read_csv(file)
         for interval in intervals:
-            #Model().GetBestEstimatorsShiftStrategy(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
-            Model().GetBestEstimatorNexDayStrategy(df,interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Next Day Strategy')
+            Model().GetBestEstimatorNexDayStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Next Day Strategy')
+            #Model().GetBestEstimatorsShiftStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
+            
 
 
 if  __name__ =='__main__': main() 
