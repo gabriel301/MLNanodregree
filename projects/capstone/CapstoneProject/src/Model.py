@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import math
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import ShuffleSplit
@@ -7,13 +12,10 @@ from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression,Ridge,HuberRegressor,Lasso,ElasticNet
 from sklearn.neighbors import KNeighborsRegressor
 from Util import Util
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.decomposition import PCA
-import math
 from TechinalIndicators import TechnicalIndicators
+
 class Model:
   
     def GetTrainPredictData(self,df,featureColumns,targetColumn,trainSize=0.8,recordsToPredict = 1):
@@ -182,6 +184,7 @@ class Model:
 
 
     def TrainAndPredict(self,modelName,df,startdate,enddate,periodToPredict):
+        print 'Training {} Regressor...'.format(modelName)
         scale = df['Adjusted_Close'][0]
         dfFiltered = Util().FilterDataFrameByDate(df.copy(),startdate,enddate)
         featureColumns = list(df.columns.values)
@@ -191,6 +194,7 @@ class Model:
         X_train, X_test, y_train, y_test = self.GetTrainPredictData(dfFiltered.copy(),featureColumns,['Norm_Adjusted_Close'],0.9,periodToPredict)
         b_estimator, _ ,_ = self.fit_model(models.get(key),params.get(key),X_train.values,y_train.values)
         valueToPredict = dfFiltered[:-1,featureColumns].values
+        print 'Predicting...'
         prediction = b_estimator.predict(valueToPredict)
         reScaled = prediction * scale
         return reScaled

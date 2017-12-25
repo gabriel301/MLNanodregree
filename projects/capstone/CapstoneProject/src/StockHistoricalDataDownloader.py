@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import urllib
 import re
 import pandas as pd
@@ -9,8 +10,8 @@ import io
 import requests
 import argparse
 import datetime
-from operator import itemgetter
 import numpy as np
+from operator import itemgetter
 from Util import Util
 
 class StockHistoricalDataDownloader:
@@ -220,8 +221,8 @@ class StockHistoricalDataDownloader:
         else:
             folderHistorical = self.GetHistoricalDataFromAlphaVantage(symbols,outputfolder,identifier,replace)
     
-        quotesFolder = stocks.GetCleanDataframe(folderHistorical,outputfolder)
-        normalizedFolder = stocks.GetNormalizedDataframe(quotesFolder,outputfolder)
+        quotesFolder = self.GetCleanDataframe(folderHistorical,outputfolder)
+        normalizedFolder = self.GetNormalizedDataframe(quotesFolder,outputfolder)
 
         return normalizedFolder
 

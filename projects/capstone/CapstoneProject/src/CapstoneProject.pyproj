@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>da44fc14-e72a-430b-95bf-a5b07ac39049</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Model.py</StartupFile>
+    <StartupFile>predict.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,6 +23,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Model.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="predict.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TechinalIndicators.py">
