@@ -19,13 +19,15 @@ class StockHistoricalDataDownloader:
     def GetHistoricalDataFromAlphaVantage(self,stockSymbols,outputfolder,identifier,replace):
         total = len(stockSymbols)
         count=1
-        apiKey = ""
+        apiKey = "2LZWQ360LNACRFVZ"
         outputPath = os.path.join(outputfolder,"Data/Download/Historical/AlphaVantage")
         Util().CreateFolder(outputPath)
         notFoundSymbols = []
         if(identifier):
                 identifier = str(identifier) if str(identifier).find('.') == 0 else "." + str(identifier)
                 identifier = identifier.upper()
+        else:
+            identifier = ""
 
         for symbol in stockSymbols:            
             symbolKey = str(symbol) + str(identifier).upper()
@@ -81,7 +83,8 @@ class StockHistoricalDataDownloader:
             if(identifier):
                 identifier = str(identifier) if str(identifier).find('.') == 0 else "." + str(identifier)
                 identifier = identifier.upper()
-
+            else:
+                identifier = ""
             symbolKey = symbol + str(identifier).upper()
 
             outputfileName= symbolKey+".csv"
