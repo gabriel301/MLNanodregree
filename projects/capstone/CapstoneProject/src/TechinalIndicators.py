@@ -12,10 +12,10 @@ class TechnicalIndicators:
     #ShortTerm - 10 days, 1.9 std
     #Standard - 20 days, 2 std
     #LongTerm - 50 days, 2.1 std
-    def GetBoillingerBands(self,values,period,std,prefix,supressMessage = True):
+    def GetBollingerBands(self,values,period,std,prefix,supressMessage = True):
         prefix = prefix+"_"
         if not supressMessage:
-            print "Calculating Billinger Bands..."
+            print "Calculating Bollinger Bands..."
         upperband, middleband, lowerband = talib.BBANDS(values,period,std)
         values = [lowerband,middleband,upperband]
         columns = [prefix+"Lower_BBand",prefix+"Mid_BBand",prefix+"Upper_BBand"]
@@ -103,9 +103,9 @@ class TechnicalIndicators:
         dfs.append( self.GetRSI(values,"Std",supressMessage))
         dfs.append(self.GetMACD(values,"Std",supressMessage))
         #dfs.append(self.GetStochastic(dfQuotes.copy(),"Std"))
-        dfs.append(self.GetBoillingerBands(values,10,1.9,"Short",supressMessage))
-        dfs.append(self.GetBoillingerBands(values,20,2,"Middle",supressMessage))
-        dfs.append(self.GetBoillingerBands(values,50,2.1,"Long",supressMessage))
+        dfs.append(self.GetBollingerBands(values,10,1.9,"Short",supressMessage))
+        dfs.append(self.GetBollingerBands(values,20,2,"Middle",supressMessage))
+        dfs.append(self.GetBollingerBands(values,50,2.1,"Long",supressMessage))
         dfResult = pd.concat(dfs,axis=1)
         if(writeInFile):
             Util().WriteDataFrame(dfResult,outputFolder,ticker+".csv")
