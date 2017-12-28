@@ -209,6 +209,8 @@ class StockHistoricalDataDownloader:
             dfHistorical = pd.read_csv(stockfile)
             if 'Date' in dfHistorical.columns:
                 print "Normalizing data from file {} ({} of {})".format(stockfile,count,total)
+                dfHistorical["Norm_High"] = dfHistorical["High"]/dfHistorical["High"][0]
+                dfHistorical["Norm_Low"] = dfHistorical["Low"]/dfHistorical["Low"][0]
                 dfHistorical["Norm_Adjusted_Close"] = dfHistorical["Adjusted_Close"]/dfHistorical["Adjusted_Close"][0]
                 outputfileName = str(ntpath.basename(stockfile))
                 outputFile = os.path.join(outputPath,outputfileName)
@@ -236,7 +238,7 @@ def main():
                                      epilog=epilog, add_help=True)
 
     parser.add_argument('symbols', help='Stock Companies Symbols separeted by comma')
-    parser.add_argument('-o,--outputfolder', help='Folder that all historical stock prices will be downloaded.',const='a',
+    parser.add_argument('-o','--outputfolder', help='Folder that all historical stock prices will be downloaded.',const='./',
                         default='./',
                         action='store',
                         nargs='?')
@@ -263,8 +265,8 @@ def main():
 
     parser.add_argument('-d','--datasource', 
                         help='Source from data to historical data to download. Letter y for Yahoo Finance, a for Alphavantage (default)'
-                        ,const='a',
-                        default='a',
+                        ,const='y',
+                        default='y',
                         action='store',
                         nargs='?')
     args=parser.parse_args()

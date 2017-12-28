@@ -48,10 +48,10 @@ class Model:
     def build_params(self):
         models = {}
         models['Linear'] = {'normalize': [True, False],'fit_intercept': [True, False],'n_jobs':[-1]}
-        models['Ridge'] = {'alpha': [0.00015,0.0002,0.0001,0.00009], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0]}
-        models['Huber'] = {'alpha': [0.01,0.001,0.0001], 'epsilon': [1.1,1.35,1.5],'fit_intercept': [False]}
-        models['Lasso'] = {'alpha': [0.00009,0.0002,0.0001,0.00015], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random']}
-        models['ElasticNet'] = {'alpha': [1.0,1.1, 1.5], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random'],'l1_ratio':[0.25,0.5,1]}
+        models['Ridge'] = {'alpha': [0.01,0.02,0.0095,0.015], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0]}
+        models['Huber'] = {'alpha': [0.01,0.02,0.0095,0.015], 'epsilon': [1.1,1.35,1.5,1.75],'fit_intercept': [False]}
+        models['Lasso'] = {'alpha': [0.01,0.02,0.0095,0.015], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random']}
+        models['ElasticNet'] = {'alpha': [1.0,1.1, 1.5,1.75], 'normalize': [True, False],'fit_intercept': [True, False], 'random_state':[0],'selection':['cyclic','random'],'l1_ratio':[0.25,0.5,1]}
         
         return models
 
@@ -75,12 +75,12 @@ class Model:
         scores = {}
         metrics = {}
         featureColumns = list(df.columns.values)
-        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
+        dfMetrics = pd.DataFrame(columns=['Model','R2 Training Score','R2 Test Score','MSE Train Score','MSE Test Score','Max Relative Error Percentage','Min Relative Error Percentage','Mean Relative Error Percentage','Std Relative Error Percentage','Q1 Relative Error Percentage','Q2 Relative Error Percentage','Q3 Relative Error Percentage','IQR Relative Error Percentage','Params'])
         dfResult = pd.DataFrame(columns=['Date','Actual'])
         X_train, X_test, y_train, y_test = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
         dfResult['Actual'] = X_test['Adjusted_Close']
         dfResult['Date'] = X_test['Date']
-        featureColumns = featureColumns[9:]
+        featureColumns = featureColumns[10:]
         X_train = X_train[featureColumns]
         X_test = X_test[featureColumns]
         for key in models:
@@ -93,21 +93,21 @@ class Model:
             pred = b_estimator.predict(X_test)
             reScaled = pred*df['Adjusted_Close'][0]
             dfResult[key] = reScaled
-            dfResult[key + " % diff"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
+            dfResult[key + " Relative Error Percentage"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
             metrics['Model'] = key
             metrics['R2 Training Score'] = b_estimator.score(X_train.values,y_train.values)
             metrics['R2 Test Score'] = b_estimator.score(X_test.values,y_test)
             metrics['MSE Train Score'] = mean_squared_error(y_train,b_estimator.predict(X_train.values))
             metrics['MSE Test Score'] = mean_squared_error(y_test,pred)
             metrics['Params'] = str(params[key])
-            metrics['Max % Diff'] = dfResult[key + " % diff"].values.max()
-            metrics['Min % Diff'] = dfResult[key + " % diff"].values.min()
-            metrics['Mean % Diff'] = dfResult[key + " % diff"].values.mean()
-            metrics['Std % Diff'] = dfResult[key + " % diff"].values.std()
-            metrics['Q1 % Diff'] = dfResult[key + " % diff"].quantile(0.25)
-            metrics['Q2 % Diff'] = dfResult[key + " % diff"].quantile(0.50)
-            metrics['Q3 % Diff'] = dfResult[key + " % diff"].quantile(0.75)
-            metrics['IQR % Diff'] = metrics['Q3 % Diff'] - metrics['Q1 % Diff']
+            metrics['Max Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.max()
+            metrics['Min Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.min()
+            metrics['Mean Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.mean()
+            metrics['Std Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.std()
+            metrics['Q1 Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].quantile(0.25)
+            metrics['Q2 Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].quantile(0.50)
+            metrics['Q3 Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].quantile(0.75)
+            metrics['IQR Relative Error Percentage'] = metrics['Q3 Relative Error Percentage'] - metrics['Q1 Relative Error Percentage']
             dfMetrics = dfMetrics.append(metrics,ignore_index=True)
             print "R2 Training Score {}".format(metrics['R2 Training Score'])
             print "R2 Test Score {}".format(metrics['R2 Test Score'])
@@ -124,7 +124,7 @@ class Model:
         scores = {}
         metrics = {}
         featureColumns = list(df.columns.values)
-        dfMetrics = pd.DataFrame(columns=['Model','R2 Test Score','MSE Test Score','Max % Diff','Min % Diff','Mean % Diff','Std % Diff','Q1 % Diff','Q2 % Diff','Q3 % Diff','IQR % Diff','Params'])
+        dfMetrics = pd.DataFrame(columns=['Model','R2 Test Score','MSE Test Score','Max Relative Error Percentage','Min Relative Error Percentage','Mean Relative Error Percentage','Std Relative Error Percentage','Q1 Relative Error Percentage','Q2 Relative Error Percentage','Q3 Relative Error Percentage','IQR Relative Error Percentage','Params'])
         dfResult = pd.DataFrame(columns=['Date','Actual'])
         X_train, X_test, y_train, y_test = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,1)
         dfResult['Actual'] = (y_test.iloc[:,0]*df['Adjusted_Close'][0]).values[-recordsToPredict:]
@@ -155,21 +155,21 @@ class Model:
                 predictons.append(pred[0])
             reScaled = np.asarray(predictons)*df['Adjusted_Close'][0]
             dfResult[key] = reScaled
-            dfResult[key + " % diff"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
+            dfResult[key + " Relative Error Percentage"] = ((reScaled - dfResult['Actual'].values)/dfResult['Actual'].values)*100
             metrics['Model'] = key
             #metrics['R2 Training Score'] = model.score(X_train,y_train)
             metrics['R2 Test Score'] = r2_score(y_test.values,predictons)
             #metrics['MSE Train Score'] = mean_squared_error(y_train,model.predict(X_train))
             metrics['MSE Test Score'] = mean_squared_error(y_test.values,predictons)
             metrics['Params'] = str(params[key])
-            metrics['Max % Diff'] = dfResult[key + " % diff"].values.max()
-            metrics['Min % Diff'] = dfResult[key + " % diff"].values.min()
-            metrics['Mean % Diff'] = dfResult[key + " % diff"].values.mean()
-            metrics['Std % Diff'] = dfResult[key + " % diff"].values.std()
-            metrics['Q1 % Diff'] = dfResult[key + " % diff"].quantile(0.25)
-            metrics['Q2 % Diff'] = dfResult[key + " % diff"].quantile(0.50)
-            metrics['Q3 % Diff'] = dfResult[key + " % diff"].quantile(0.75)
-            metrics['IQR % Diff'] = metrics['Q3 % Diff'] - metrics['Q1 % Diff']
+            metrics['Max Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.max()
+            metrics['Min Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.min()
+            metrics['Mean Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.mean()
+            metrics['Std Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].values.std()
+            metrics['Q1 Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].quantile(0.25)
+            metrics['Q2 Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].quantile(0.50)
+            metrics['Q3 Relative Error Percentage'] = dfResult[key + " Relative Error Percentage"].quantile(0.75)
+            metrics['IQR Relative Error Percentage'] = metrics['Q3 Relative Error Percentage'] - metrics['Q1 Relative Error Percentage']
             dfMetrics = dfMetrics.append(metrics,ignore_index=True)
             #print "R2 Training Score {}".format(metrics['R2 Training Score'])
             print "R2 Test Score {}".format(metrics['R2 Test Score'])
@@ -190,7 +190,7 @@ class Model:
         featureColumns = featureColumns[9:]
         model = self.build_models().get(modelName)
         params = self.build_params().get(modelName)
-        X_train, X_test, y_train, y_test = self.GetTrainPredictData(dfFiltered.copy(),featureColumns,['Norm_Adjusted_Close'],0.9,periodToPredict)
+        X_train, X_test, y_train, y_test = self.GetTrainPredictData(dfFiltered.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,periodToPredict)
         b_estimator, _ ,_ = self.fit_model(model,params,X_train.values,y_train.values)
         valueToPredict = dfFiltered[featureColumns].iloc[-1].values
         print 'Predicting...'

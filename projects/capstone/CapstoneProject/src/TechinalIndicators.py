@@ -80,33 +80,33 @@ class TechnicalIndicators:
         return df
 
       
-    def GetStochastic(self,dfQuote,prefix):
-        if 'Norm_Adjusted_Close' in dfQuote.columns:
-            print "Calculating Sthocastic Indicator..."
-            prices = dfQuote['Norm_Adjusted_Close'].tolist()
-            slowk, slowd = talib.STOCH(dfQuote['High'].values,dfQuote['Low'].values,values)
-            values = [slowk,slowd]
-            columns = [prefix+"SLOWK",prefix+"SLOWD"]
-            df = Util().BuildDataFrame(columns,values).copy()
+    def GetStochastic(self,high,low,close,prefix):
+        print "Calculating Sthocastic Indicator..."
+        slowk, slowd = talib.STOCH(high,low,close)
+        values = [slowk,slowd]
+        columns = [prefix+"SLOWK",prefix+"SLOWD"]
+        df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetIndicators(self,values,ticker,outputFolder="",writeInFile = False, supressMessage = True):
+    def GetIndicators(self,df,ticker,outputFolder="",writeInFile = False, supressMessage = True):
         outputFolder = os.path.join(outputFolder,"Data/Historical/Indicators")
+        values = df['Norm_Adjusted_Close'].values
         dfs = []
-        dfs.append(self.GetSMA(values,15,"Short",supressMessage))
+        #dfs.append(self.GetSMA(values,15,"Short",supressMessage))
         dfs.append(self.GetSMA(values,30,"Middle",supressMessage))
-        dfs.append(self.GetSMA(values,50,"Long",supressMessage))
-        dfs.append(self.GetEMA(values,15,"Short",supressMessage))
+        #dfs.append(self.GetSMA(values,50,"Long",supressMessage))
+        #dfs.append(self.GetEMA(values,15,"Short",supressMessage))
         dfs.append(self.GetEMA(values,30,"Middle",supressMessage))
-        dfs.append(self.GetEMA(values,50,"Long",supressMessage))
+        #dfs.append(self.GetEMA(values,50,"Long",supressMessage))
         dfs.append(self.GetMomentum(values,"Std",supressMessage))
         dfs.append( self.GetRSI(values,"Std",supressMessage))
         dfs.append(self.GetMACD(values,"Std",supressMessage))
-        #dfs.append(self.GetStochastic(dfQuotes.copy(),"Std"))
-        dfs.append(self.GetBollingerBands(values,10,1.9,"Short",supressMessage))
+        dfs.append(self.GetStochastic(df['Norm_High'].values,df['Norm_Low'].values,values,"Std"))
+        #dfs.append(self.GetBollingerBands(values,10,1.9,"Short",supressMessage))
         dfs.append(self.GetBollingerBands(values,20,2,"Middle",supressMessage))
-        dfs.append(self.GetBollingerBands(values,50,2.1,"Long",supressMessage))
+        #dfs.append(self.GetBollingerBands(values,50,2.1,"Long",supressMessage))
         dfResult = pd.concat(dfs,axis=1)
+        dfResult = Util().Normalize(dfResult,dfResult.columns.values)
         if(writeInFile):
             Util().WriteDataFrame(dfResult,outputFolder,ticker+".csv")
         return dfResult
@@ -114,7 +114,7 @@ class TechnicalIndicators:
     def GetIndicatorsFromDF(self,dfQuotes,outputFolder="",writeInFile = False,supressMessages = False):
         ticker = dfQuotes['Ticker'][0]
         outputFolder = os.path.join(outputFolder,"Data/Historical/Indicators")
-        dfIndicators = self.GetIndicators(dfQuotes['Norm_Adjusted_Close'].values,dfQuotes['Ticker'][0],outputFolder,False,supressMessages)
+        dfIndicators = self.GetIndicators(dfQuotes,dfQuotes['Ticker'][0],outputFolder,False,supressMessages)
         dfs = [dfQuotes,dfIndicators]
         dfResult = pd.concat(dfs,axis=1)
         if(writeInFile):

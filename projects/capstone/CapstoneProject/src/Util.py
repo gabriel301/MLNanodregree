@@ -4,6 +4,7 @@ import ntpath
 import math
 import datetime
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 class Util:
 
@@ -51,11 +52,13 @@ class Util:
             dfFiltered = pd.merge(dfDates, df, on='Date', how='left')
             return dfFiltered
 
-    def BuildDataFrame(self,columnNames,values,include_index=False,fillna=True):
+    def BuildDataFrame(self,columnNames,values,include_index=False,fillna=True,normalize = False):
         df = pd.DataFrame.from_items(zip(columnNames, values))
         if(fillna):
             df.fillna(method='ffill',inplace=True)
             df.fillna(method='bfill',inplace=True)
+        if(normalize):
+            df = self.Normalize(df.copy(),columnNames)
         return df
 
     def WriteDataFrame(self, df, outputfolder,filename,include_index=False):
@@ -65,3 +68,11 @@ class Util:
         print "Writing Dataframe..."
         df.to_csv(outputPath,index=include_index)
         print "File Created at {}".format(outputPath)
+
+    def Normalize(self, df, columnNames, start = 0, end = 1):
+        scale = MinMaxScaler(feature_range=(start, end))
+        scaled = scale.fit_transform(df)
+        #dict = {'scale': scale.scale_}
+        dfResult = pd.DataFrame(scaled,columns = columnNames)
+        #dfResult = pd.concat([df,pd.DataFrame(dict)],axis=1)
+        return dfResult
