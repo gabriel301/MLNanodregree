@@ -1,7 +1,7 @@
 
 # Machine Learning Engineer Nanodegree
 ## Capstone Project: Building a Stock Price Predictor
-Gabriel Augusto  
+Gabriel Augusto
 December 29th, 2017
 
 ## I. Definition
@@ -48,7 +48,6 @@ The Dutch East India Company in Netherlands issued the first known stock certifi
 <p>In the United States, the fisrt stock price was established in Philadelphia in 1790 and was called "The Board of Brokers". Now it is a part of NASDAQ, known as NASDAQ OMX PHLX. 
 Shortly after the establisment of the Philadelphia Stock Exchange, the stock markert started to grow in New York, moved by 24 stock brokers outside of 68 Wall Street. As the market became more structured, in 1817 the New York Stock and Exchange Board was established.[2] </p>
 
-
 ### Problem Statement
 
 <p>Given historical data for different stocks, is it possible to predict those stock prices for the future?
@@ -60,7 +59,7 @@ We will also calculate some <i>technical indicators</i> [7] for data, using them
   <li>Bollinger Bands [7]</li>
   <li>Exponential Moving Average (EMA) [8]</li>
   <li>Simple Moving Average (SMA) [9]</li>
-</ul>  
+</ul>
 </p>
 <p>
 <b>Momentum Indicators</b>
@@ -69,7 +68,7 @@ We will also calculate some <i>technical indicators</i> [7] for data, using them
   <li>Momentum [11]</li>
   <li>Relative Strength Index (RSI) [12]</li>
   <li>Stochastic Oscillator [21]</li>
-</ul> 
+</ul>
 <br>
 </p>
 
@@ -79,7 +78,7 @@ Thus the expected input for the <b>training algorithm</b> is: <br>
 <ul>
   <li>A list of trade dates with its respectly high, low and adjusted closing prices</li>
   <li>A set of technical indicators calculated based on the input list described above.</li>
-</ul> 
+</ul>
 </p>
 
 <p>The expected input for the <b>Predictor</b> is: <br>
@@ -107,10 +106,10 @@ A list of stock symbols (aka companies tickers) and the number of days n ahead t
     <li> Perform a model tuning in order to have the best model amongst different initial setups</li>
 </ul></p>
 
-### Metrics 
-<p>Since the proposed solution for this problem is a regression, the model metric chosen is the <b>coefficient of determination, also known as $R^2$ Score</b>. <br>
+### Metrics
+<p>Since the proposed solution for this problem is a regression, the model metric chosen is the <b>coefficient of determination, also known as R2 Score</b>. <br>
 The coefficient of determination is widely used to evaulate the goodness of fit of a model. It explains how well the predictions os a model approximates to the real data. <br>
-$R^2$ Score is scaled from 0 to 1, which 1 indicating a perfect fit of the model to data. </p>
+R2 Score is scaled from 0 to 1, which 1 indicating a perfect fit of the model to data. </p>
 <p> The <b>Mean Squared Error (MSE) </b> will also be computed, but only for comparision reasons. </p>
 
 ## II. Analysis
@@ -121,50 +120,7 @@ Historical data for the follow companies will be analyzed: <br>
 - Petrobras SA - PETR3 (PETR3.SA)
 - Usiminas SA - USIM5 (USIM5.SA)
 
-
-```python
-#Imports
-import sys
-sys.path.insert(0, '..\src') #Used to include the path in python's search
-from Util import Util
-import pandas as pd
-import datetime as dt
-import matplotlib.pyplot as plt
-import seaborn as sns
-from IPython.display import display
-import ntpath
-sns.set(style="darkgrid")
-%matplotlib inline  
-```
-
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Download\Historical\Yahoo','.csv')
-dfs = []
-headers = ['Ticker','Min Date','Max Date','Count','Mean','Std','Min','25%','50%','75%','Max']
-rows = []
-for file in filenames:
-    df = pd.read_csv(file)
-    row = [df['Ticker'][0],df['Date'][0],df['Date'][df.shape[0]-1],]
-    row.extend(df['Adjusted_Close'].describe(percentiles = [.25,.50,.75]).values)
-    rows.append(row)
-    print "Sample of file {}".format(file)
-    display(df.head())
-    display(df.tail())
-    dfs.append(df.copy())
-
-dfDescriptive = pd.DataFrame(rows,columns = headers)    
-print "Basic Descriptive Statistics for Data"
-dfDescriptive
-
-
-```
-
-    Getting .csv files from .\Data\Download\Historical\Yahoo
-    3 files found
     Sample of file .\Data\Download\Historical\Yahoo\EMBR3.SA.csv
-    
-
 
 <div>
 <style>
@@ -254,8 +210,6 @@ dfDescriptive
 </table>
 </div>
 
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -344,10 +298,7 @@ dfDescriptive
 </table>
 </div>
 
-
     Sample of file .\Data\Download\Historical\Yahoo\PETR3.SA.csv
-    
-
 
 <div>
 <style>
@@ -437,8 +388,6 @@ dfDescriptive
 </table>
 </div>
 
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -527,11 +476,7 @@ dfDescriptive
 </table>
 </div>
 
-
     Sample of file .\Data\Download\Historical\Yahoo\USIM5.SA.csv
-    
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -619,8 +564,6 @@ dfDescriptive
   </tbody>
 </table>
 </div>
-
-
 
 <div>
 <style>
@@ -801,59 +744,11 @@ dfDescriptive
 <p>Given the fact above, it is very likely that these quotes miss data about some days over the years.</p>
 <p>Below, the plot of adjusted close prices: </p>
 
-
-```python
-dates = dfs[0]['Date'].values
-dates_list = [dt.datetime.strptime(date, "%Y-%m-%d") for date in dates]
-df = pd.DataFrame(index=dates_list)
-
-for dfStock in dfs:
-    dfTemp = Util().FilterDataFrameByDate(dfStock.copy(),dates_list[0],dates_list[-1])
-    df[dfStock['Ticker'][0]] = dfTemp['Adjusted_Close'].values
-
-df.plot(title="Ajusted Close Prices",figsize=(18,9)).set(xlabel='Date', ylabel='Price')
-#plt.tight_layout()
-
-```
-
-    Filtering Dataframe by Date
-    4538 dates loaded.
-    Filtering Dataframe by Date
-    4538 dates loaded.
-    Filtering Dataframe by Date
-    4538 dates loaded.
-    
-
-
-
-
-    [<matplotlib.text.Text at 0xf02f828>, <matplotlib.text.Text at 0xd4e1470>]
-
-
-
-
-![png](output_6_2.png)
-
+![png](.\img\output_6_2.png)
 
 Let's try to find out whether there are missing values
 
-
-```python
-df = pd.DataFrame()
-entries = {}
-for dfStock in dfs:
-    entries[dfStock['Ticker'][0]] = sum(dfStock.isnull().values.ravel())
-
-df = df.append(entries,ignore_index=True)
-print "Missing value count for each stock"
-display(df)
-df.plot(kind='bar',title="Missing Value Cells",figsize=(18,9)).set(xlabel='Ticker', ylabel='Count')
-```
-
     Missing value count for each stock
-    
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -888,16 +783,7 @@ df.plot(kind='bar',title="Missing Value Cells",figsize=(18,9)).set(xlabel='Ticke
 </table>
 </div>
 
-
-
-
-
-    [<matplotlib.text.Text at 0xbb60a90>, <matplotlib.text.Text at 0xd4e5908>]
-
-
-
-
-![png](output_8_3.png)
+![png](.\img\output_8_3.png)
 
 
 Data shows that USIM5 has the highest number of missing values, which explains why it has lower counting value than EMBR3, for instance. <br>
@@ -951,29 +837,6 @@ In this case, filling missing values with values with zeroes or interpoling migh
 </p>
 <p> Below the comparision between original data and pre-processed data. For implemention details, please refer to <b>StockHistoricalDataDownloader</b> code.
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Quotes\Normalized','.csv')
-dfsProcessed = []
-headers = ['Ticker','Min Date','Max Date','Count','Mean','Std','Min','25%','50%','75%','Max']
-rows = []
-for file in filenames:
-    df = pd.read_csv(file)
-    row = [df['Ticker'][0],df['Date'][0],df['Date'][df.shape[0]-1],]
-    row.extend(df['Adjusted_Close'].describe(percentiles = [.25,.50,.75]).values)
-    rows.append(row)
-    print "Sample of file {}".format(file)
-    display(df.head())
-    display(df.tail())
-    dfsProcessed.append(df.copy())
-
-dfDescriptive = pd.DataFrame(rows,columns = headers)    
-print "Basic Descriptive Statistics for Pre-Processed Data (Adjusted_Close Column)"
-dfDescriptive
-```
-
-    Getting .csv files from .\Data\Quotes\Normalized
-    3 files found
     Sample of file .\Data\Quotes\Normalized\EMBR3.SA.csv
     
 
@@ -1722,22 +1585,7 @@ dfDescriptive
 Values for descriptive statistics also changed.</p>
 <p>Below we verify the missing data counting: </p>
 
-
-```python
-df = pd.DataFrame()
-entries = {}
-for dfStock in dfsProcessed:
-    entries[dfStock['Ticker'][0]] = sum(dfStock.isnull().values.ravel())
-
-df = df.append(entries,ignore_index=True)
-print "Missing value count for each stock - Pre-processed dataset"
-display(df)
-#df.plot(kind='bar',title="Missing Value Cells - Pre-processed dataset",figsize=(18,9)).set(xlabel='Ticker', ylabel='Count')
-```
-
     Missing value count for each stock - Pre-processed dataset
-    
-
 
 <div>
 <style>
@@ -1773,59 +1621,13 @@ display(df)
 </table>
 </div>
 
-
 The below figure shows the prices behaviour after pre-processing data:
 
+![png](.\img\output_15_2.png)
 
-```python
-dates = dfs[0]['Date'].values
-dates_list = [dt.datetime.strptime(date, "%Y-%m-%d") for date in dates]
-df = pd.DataFrame(index=dates_list)
-dfNormalized = pd.DataFrame(index=dates_list)
-for dfStock in dfsProcessed:
-    dfTemp = Util().FilterDataFrameByDate(dfStock.copy(),dates_list[0],dates_list[-1])
-    df[dfStock['Ticker'][0]] = dfTemp['Adjusted_Close'].values
-    dfNormalized[dfStock['Ticker'][0]] = dfTemp['Norm_Adjusted_Close'].values
-
-df.plot(title="Ajusted Close Prices",figsize=(18,9)).set(xlabel='Date', ylabel='Price')
-dfNormalized.plot(title="Normalized Ajusted Close Prices",figsize=(18,9)).set(xlabel='Date', ylabel='Price Variation')
-#display(df.ix[df["Adjusted_Close"].idxmax])
-```
-
-    Filtering Dataframe by Date
-    4538 dates loaded.
-    Filtering Dataframe by Date
-    4538 dates loaded.
-    Filtering Dataframe by Date
-    4538 dates loaded.
-    
-
-
-
-
-    [<matplotlib.text.Text at 0xd33dc88>, <matplotlib.text.Text at 0xce49390>]
-
-
-
-
-![png](output_15_2.png)
-
-
-
-![png](output_15_3.png)
-
+![png](.\img\output_15_3.png)
 
 <p> One might ask what the 'bar' in the plot for PETR3 stocks. It is a price peak in that specific day. Below, the information about the peak value:
-
-
-```python
-dfPETR = dfsProcessed[1][2500:3000].reset_index()
-display(dfPETR.iloc[dfPETR['Norm_Adjusted_Close'].argmax()])
-dfPETR = dfPETR[['Date','Adjusted_Close']].set_index('Date')
-dfPETR.plot(title="Adjusted Close Prices - PETR3",figsize=(18,9)).set(xlabel='Date', ylabel='Price')
-
-```
-
 
     index                        2891
     Date                   2011-05-16
@@ -1839,56 +1641,17 @@ dfPETR.plot(title="Adjusted Close Prices - PETR3",figsize=(18,9)).set(xlabel='Da
     Norm_High                 24.6694
     Norm_Low                       24
     Norm_Adjusted_Close       24.8506
-    Name: 391, dtype: object
 
-
-
-
-
-    [<matplotlib.text.Text at 0xcf57400>, <matplotlib.text.Text at 0xbb60390>]
-
-
-
-
-![png](output_17_2.png)
-
+![png](.\img\output_17_2.png)
 
 <p>After data cleaned, thechnical indicators are calculated for each ticker on Normalized High, Low and Price. Indicators parameters are informed in the code.</p>
 <p>Below, the plots for a few indicators calculated: <p>
 
+![png](.\img\output_19_1.png)
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators\Non-Normalized','.csv')
-dfsIndicators = []
-specList = ['Date','Norm_Adjusted','Middle','Std_']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(10, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    ticker = df["Ticker"][0]
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.drop('Std_RSI',axis=1,inplace=True)
-    df = df.set_index("Date")
-    dfsIndicators.append(df.copy())
-    df.plot(title="Price and Indicators - " + ticker,figsize=(18,9)).set(xlabel='Date', ylabel='Variation')
+![png](.\img\output_19_2.png)
 
-```
-
-    Getting .csv files from .\Data\Indicators\Non-Normalized
-    3 files found
-    
-
-
-![png](output_19_1.png)
-
-
-
-![png](output_19_2.png)
-
-
-
-![png](output_19_3.png)
-
+![png](.\img\output_19_3.png)
 
 ### Implementation
 <p><b>Implementation Pipeline:</b><br>
@@ -1926,24 +1689,6 @@ Prediction is performed with the testing dataset. Metrics and Benchmarks are com
 
 ### Initial Results
 <p> For the first implementation, the <b>Normalized High, Normalized Low, Normalized Adjusted Prices and the indicators</b> were considered as features. Below are the benchmarks for each model for predicting 1, 7, 15, 30, 60 and 120 days ahead:
-
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Benchmarks\EMBR3','.csv')
-i=0
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df.drop('Params',axis = 1, inplace = True)
-    print "Scores for {}".format(plotId)
-    display(df)
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Benchmarks\EMBR3
-    6 files found
-    Scores for 1 - Scores EMBR3 1 days
-    
-
 
 <div>
 <style>
@@ -2678,112 +2423,52 @@ for file in filenames:
 </table>
 </div>
 
+![png](.\img\output_22_1.png)
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Predictions\EMBR3','.csv')
-specList = ['Relative Error']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(5, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.columns = [str(col) +" "+ plotId for col in df.columns]
-    ax = df.hist(figsize=(16,10),bins=100)
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Predictions\EMBR3
-    6 files found
-    
+![png](.\img\output_22_2.png)
 
 
-![png](output_22_1.png)
+![png](.\img\output_22_3.png)
 
 
+![png](.\img\output_22_4.png)
 
-![png](output_22_2.png)
+
+![png](.\img\output_22_5.png)
+
+
+![png](.\img\output_22_6.png)
+
+
+![png](.\img\output_23_1.png)
 
 
 
-![png](output_22_3.png)
+![png](.\img\output_23_2.png)
 
 
 
-![png](output_22_4.png)
+![png](.\img\output_23_3.png)
 
 
 
-![png](output_22_5.png)
+![png](.\img\output_23_4.png)
 
 
 
-![png](output_22_6.png)
+![png](.\img\output_23_5.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Predictions\EMBR3','.csv')
-sns.set_palette(sns.hls_palette(6, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(18,9))
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Predictions\EMBR3
-    6 files found
-    
-
-
-![png](output_23_1.png)
-
-
-
-![png](output_23_2.png)
-
-
-
-![png](output_23_3.png)
-
-
-
-![png](output_23_4.png)
-
-
-
-![png](output_23_5.png)
-
-
-
-![png](output_23_6.png)
-
+![png](.\img\output_23_6.png)
 
 <p>In general <b>Ordinary Least Squares (named Linear) and Rigde </b> were the <b>best models </b> when looking at R2 Score whereas <b>Elastic Net</b>  was the worse</p>
 <p>The error variation was higher than the benchmark (+- 5%) for all models and all intervals except 1 day prediction for<b> EMBR3 </b> </p>
 <p> Only <b>Elastic Net</b> model roughly exceed the benchmark interval for 1 day prediction. </p>
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Benchmarks\PETR3','.csv')
-i=0
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df.drop('Params',axis = 1, inplace = True)
-    print "Scores for {}".format(plotId)
-    display(df)
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Benchmarks\PETR3
-    6 files found
     Scores for 1 - Scores PETR3 1 days
     
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -3517,111 +3202,56 @@ for file in filenames:
 </table>
 </div>
 
-
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Predictions\PETR3','.csv')
-specList = ['Relative Error']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(5, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.columns = [str(col) +" "+ plotId for col in df.columns]
-    ax = df.hist(figsize=(16,10),bins=100)
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Predictions\PETR3
-    6 files found
-    
-
-
-![png](output_26_1.png)
+![png](.\img\output_26_1.png)
 
 
 
-![png](output_26_2.png)
+![png](.\img\output_26_2.png)
 
 
 
-![png](output_26_3.png)
+![png](.\img\output_26_3.png)
 
 
 
-![png](output_26_4.png)
+![png](.\img\output_26_4.png)
 
 
 
-![png](output_26_5.png)
+![png](.\img\output_26_5.png)
 
 
 
-![png](output_26_6.png)
+![png](.\img\output_26_6.png)
+
+![png](.\img\output_27_1.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Predictions\PETR3','.csv')
-sns.set_palette(sns.hls_palette(6, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(18,9))
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Predictions\PETR3
-    6 files found
-    
-
-
-![png](output_27_1.png)
+![png](.\img\output_27_2.png)
 
 
 
-![png](output_27_2.png)
+![png](.\img\output_27_3.png)
 
 
 
-![png](output_27_3.png)
+![png](.\img\output_27_4.png)
 
 
 
-![png](output_27_4.png)
+![png](.\img\output_27_5.png)
 
 
 
-![png](output_27_5.png)
-
-
-
-![png](output_27_6.png)
+![png](.\img\output_27_6.png)
 
 
 <p>Again, <b>Ordinary Least Squares (named Linear) and Rigde </b> were the <b>best models </b> when looking at R2 Score whereas <b>Elastic Net</b>  was the worse</p>
 <p> Differently from <b>EMBR3 </b>, for <b>PETR4 Elastic Net</b> performed relatively well (> 0.75 R2 Score) for the first 4 tests (1, 7, 15 and 30 days) <p> 
 <p> Even tough the R2 scores were similar, the relative error for <b>Huber</b> were closer to the benchmark than Ordinary Least Squares when predicting 1 day ahead.
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Benchmarks\USIM5','.csv')
-i=0
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df.drop('Params',axis = 1, inplace = True)
-    print "Scores for {}".format(plotId)
-    display(df)
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Benchmarks\USIM5
-    6 files found
     Scores for 1 - Scores USIM5 1 days
-    
-
 
 <div>
 <style>
@@ -4358,86 +3988,50 @@ for file in filenames:
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Predictions\USIM5','.csv')
-specList = ['Relative Error']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(5, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.columns = [str(col) +" "+ plotId for col in df.columns]
-    ax = df.hist(figsize=(16,10),bins=100)
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Predictions\USIM5
-    6 files found
-    
-
-
-![png](output_30_1.png)
+![png](.\img\output_30_1.png)
 
 
 
-![png](output_30_2.png)
+![png](.\img\output_30_2.png)
 
 
 
-![png](output_30_3.png)
+![png](.\img\output_30_3.png)
 
 
 
-![png](output_30_4.png)
+![png](.\img\output_30_4.png)
 
 
 
-![png](output_30_5.png)
+![png](.\img\output_30_5.png)
 
 
 
-![png](output_30_6.png)
+![png](.\img\output_30_6.png)
+
+
+![png](.\img\output_31_1.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Indicators and Normalized Prices\Predictions\USIM5','.csv')
-sns.set_palette(sns.hls_palette(6, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(18,9))
-```
-
-    Getting .csv files from .\Data\Indicators and Normalized Prices\Predictions\USIM5
-    6 files found
-    
-
-
-![png](output_31_1.png)
+![png](.\img\output_31_2.png)
 
 
 
-![png](output_31_2.png)
+![png](.\img\output_31_3.png)
 
 
 
-![png](output_31_3.png)
+![png](.\img\output_31_4.png)
 
 
 
-![png](output_31_4.png)
+![png](.\img\output_31_5.png)
 
 
 
-![png](output_31_5.png)
-
-
-
-![png](output_31_6.png)
+![png](.\img\output_31_6.png)
 
 
 <p>For the last stock, <b> USIM5 </b> the behaviour is consistent with the previous stocks</p>
@@ -4454,23 +4048,7 @@ The results are discussed in the next section </p>
 <p>For the new input, below are the benchmark plots: </p>
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Benchmarks\EMBR3','.csv')
-i=0
-#sns.set_palette(sns.hls_palette(2, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df.drop('Params',axis = 1, inplace = True)
-    print "Scores for {}".format(plotId)
-    display(df)
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Benchmarks\EMBR3
-    6 files found
     Scores for 1 - Scores EMBR3 1 days
-    
-
 
 <div>
 <style>
@@ -5206,112 +4784,57 @@ for file in filenames:
 </div>
 
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\EMBR3','.csv')
-specList = ['Relative Error']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(5, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.columns = [str(col) +" "+ plotId for col in df.columns]
-    ax = df.hist(figsize=(16,10),bins=100)
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\EMBR3
-    6 files found
-    
-
-
-![png](output_35_1.png)
+![png](.\img\output_35_1.png)
 
 
 
-![png](output_35_2.png)
+![png](.\img\output_35_2.png)
 
 
 
-![png](output_35_3.png)
+![png](.\img\output_35_3.png)
 
 
 
-![png](output_35_4.png)
+![png](.\img\output_35_4.png)
 
 
 
-![png](output_35_5.png)
+![png](.\img\output_35_5.png)
 
 
 
-![png](output_35_6.png)
+![png](.\img\output_35_6.png)
+
+
+![png](.\img\output_36_1.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\EMBR3','.csv')
-sns.set_palette(sns.hls_palette(6, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(18,9))
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\EMBR3
-    6 files found
-    
-
-
-![png](output_36_1.png)
+![png](.\img\output_36_2.png)
 
 
 
-![png](output_36_2.png)
+![png](.\img\output_36_3.png)
 
 
 
-![png](output_36_3.png)
+![png](.\img\output_36_4.png)
 
 
 
-![png](output_36_4.png)
+![png](.\img\output_36_5.png)
 
 
 
-![png](output_36_5.png)
-
-
-
-![png](output_36_6.png)
-
+![png](.\img\output_36_6.png)
 
 <p> For <b>EMBR3 </b>, <b> Lasso </b> is the best overall model considering the metric, R2 Score, and the Benchmark. </p>
 <p>For 1 prediction, the most part of models successfully beat the benchmark, whereas for 7 only Lasso was within the benchmark interval. </p>
 <p>For the rest of predictions, despite Lasso had the best performance it could not be better than the benchmark. </p>
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Indicators\Benchmarks\PETR3','.csv')
-i=0
-#sns.set_palette(sns.hls_palette(2, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df.drop('Params',axis = 1, inplace = True)
-    print "Scores for {}".format(plotId)
-    display(df)
-```
-
-    Getting .csv files from .\Data\Only Indicators\Benchmarks\PETR3
-    6 files found
     Scores for 1 - Scores PETR3 1 days
     
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -6046,111 +5569,56 @@ for file in filenames:
 </div>
 
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\PETR3','.csv')
-specList = ['Relative Error']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(5, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.columns = [str(col) +" "+ plotId for col in df.columns]
-    ax = df.hist(figsize=(16,10),bins=100)
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\PETR3
-    6 files found
-    
-
-
-![png](output_39_1.png)
+![png](.\img\output_39_1.png)
 
 
 
-![png](output_39_2.png)
+![png](.\img\output_39_2.png)
 
 
 
-![png](output_39_3.png)
+![png](.\img\output_39_3.png)
 
 
 
-![png](output_39_4.png)
+![png](.\img\output_39_4.png)
 
 
 
-![png](output_39_5.png)
+![png](.\img\output_39_5.png)
 
 
 
-![png](output_39_6.png)
+![png](.\img\output_39_6.png)
+
+
+![png](.\img\output_40_1.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\PETR3','.csv')
-sns.set_palette(sns.hls_palette(6, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(18,9))
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\PETR3
-    6 files found
-    
-
-
-![png](output_40_1.png)
+![png](.\img\output_40_2.png)
 
 
 
-![png](output_40_2.png)
+![png](.\img\output_40_3.png)
 
 
 
-![png](output_40_3.png)
+![png](.\img\output_40_4.png)
 
 
 
-![png](output_40_4.png)
+![png](.\img\output_40_5.png)
 
 
 
-![png](output_40_5.png)
-
-
-
-![png](output_40_6.png)
+![png](.\img\output_40_6.png)
 
 
 <p><b>Elastic Net </b> was the best overall method for <b>PETR3</b> considering the benchmark. All other models were worse despite the R2 score of them was higher.</p>
 <p>Incredibly, <b> Elastic Net </b> was very consistent and beat the benchmark roughly for all tests performed.</p>
 
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Benchmarks\USIM5','.csv')
-
-#sns.set_palette(sns.hls_palette(2, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df.drop('Params',axis = 1, inplace = True)
-    print "Scores for {}".format(plotId)
-    display(df)
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Benchmarks\USIM5
-    6 files found
     Scores for 1 - Scores USIM5 1 days
-    
-
-
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -6884,88 +6352,50 @@ for file in filenames:
 </table>
 </div>
 
-
-
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\USIM5','.csv')
-specList = ['Relative Error']
-pattern = '|'.join(specList)
-sns.set_palette(sns.hls_palette(5, l=.35, s=.97))
-for file in filenames:
-    plotId = ntpath.basename(file)[:-4]
-    df = pd.read_csv(file)
-    df = df[df.columns[df.columns.to_series().str.contains(pattern)]]
-    df.columns = [str(col) +" "+ plotId for col in df.columns]
-    ax = df.hist(figsize=(16,10),bins=100)
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\USIM5
-    6 files found
-    
-
-
-![png](output_43_1.png)
+![png](.\img\output_43_1.png)
 
 
 
-![png](output_43_2.png)
+![png](.\img\output_43_2.png)
 
 
 
-![png](output_43_3.png)
+![png](.\img\output_43_3.png)
 
 
 
-![png](output_43_4.png)
+![png](.\img\output_43_4.png)
 
 
 
-![png](output_43_5.png)
+![png](.\img\output_43_5.png)
 
 
 
-![png](output_43_6.png)
+![png](.\img\output_43_6.png)
+
+
+![png](.\img\output_44_1.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\USIM5','.csv')
-sns.set_palette(sns.hls_palette(6, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(18,9))
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\USIM5
-    6 files found
-    
-
-
-![png](output_44_1.png)
+![png](.\img\output_44_2.png)
 
 
 
-![png](output_44_2.png)
+![png](.\img\output_44_3.png)
 
 
 
-![png](output_44_3.png)
+![png](.\img\output_44_4.png)
 
 
 
-![png](output_44_4.png)
+![png](.\img\output_44_5.png)
 
 
 
-![png](output_44_5.png)
-
-
-
-![png](output_44_6.png)
+![png](.\img\output_44_6.png)
 
 
 <p> Again, <b>Elastic Net</b> was the best overall model considering the benchmark, despite of not being the highest R2 Score. <p>
@@ -6985,129 +6415,76 @@ However, <b>the final solution is not significant</b> to solve the problem, beca
 ### Free-Form Visualization
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\EMBR3','.csv')
-sns.set_palette(sns.hls_palette(3, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df = df[['Lasso','Actual','ElasticNet']]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(14,7))
-```
 
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\EMBR3
-    6 files found
-    
-
-
-![png](output_46_1.png)
+![png](.\img\output_46_1.png)
 
 
 
-![png](output_46_2.png)
+![png](.\img\output_46_2.png)
 
 
 
-![png](output_46_3.png)
+![png](.\img\output_46_3.png)
 
 
 
-![png](output_46_4.png)
+![png](.\img\output_46_4.png)
 
 
 
-![png](output_46_5.png)
+![png](.\img\output_46_5.png)
 
 
 
-![png](output_46_6.png)
+![png](.\img\output_46_6.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\PETR3','.csv')
-sns.set_palette(sns.hls_palette(3, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df = df[['Lasso','Actual','ElasticNet']]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(14,7))
-```
 
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\PETR3
-    6 files found
-    
-
-
-![png](output_47_1.png)
+![png](.\img\output_47_1.png)
 
 
 
-![png](output_47_2.png)
+![png](.\img\output_47_2.png)
 
 
 
-![png](output_47_3.png)
+![png](.\img\output_47_3.png)
 
 
 
-![png](output_47_4.png)
+![png](.\img\output_47_4.png)
 
 
 
-![png](output_47_5.png)
+![png](.\img\output_47_5.png)
 
 
 
-![png](output_47_6.png)
+![png](.\img\output_47_6.png)
+
+
+![png](.\img\output_48_1.png)
 
 
 
-```python
-filenames = Util().GetFilesFromFolder('.\Data\Only Normalized Indicators\Predictions\USIM5','.csv')
-sns.set_palette(sns.hls_palette(3, l=.35, s=.97))
-for file in filenames:
-    df = pd.read_csv(file)
-    cols = [c for c in df.columns.values if c.lower().find('relative') == -1]
-    df=df[cols]
-    df= df.set_index('Date')
-    plotId = ntpath.basename(file)[:-4]
-    df = df[['Lasso','Actual','ElasticNet']]
-    df.plot(title="{} Prediction Actual vs Prediction".format(plotId),figsize=(14,7))
-```
-
-    Getting .csv files from .\Data\Only Normalized Indicators\Predictions\USIM5
-    6 files found
-    
-
-
-![png](output_48_1.png)
+![png](.\img\output_48_2.png)
 
 
 
-![png](output_48_2.png)
+![png](.\img\output_48_3.png)
 
 
 
-![png](output_48_3.png)
+![png](.\img\output_48_4.png)
 
 
 
-![png](output_48_4.png)
+![png](.\img\output_48_5.png)
 
 
 
-![png](output_48_5.png)
-
-
-
-![png](output_48_6.png)
+![png](.\img\output_48_6.png)
 
 
 ### Reflection
