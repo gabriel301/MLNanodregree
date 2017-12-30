@@ -48,7 +48,7 @@ class TechnicalIndicators:
         df = Util().BuildDataFrame(columns,values).copy()
         return df
 
-    def GetMomentum(self,values,prefix,supressMessage):
+    def GetMomentum(self,values,prefix,supressMessage = True):
         prefix = prefix+"_"
         if not supressMessage:
             print "Calculating Momentum..."
@@ -69,7 +69,7 @@ class TechnicalIndicators:
         return df
 
     #Standard - fastperiod=12, slowperiod=26, signalperiod=9   
-    def GetMACD(self,values,prefix,supressMessage):
+    def GetMACD(self,values,prefix,supressMessage = True):
         prefix = prefix+"_"
         if not supressMessage:
             print "Calculating Moving Average Convergence/Divergence (MACD)..."
@@ -80,8 +80,9 @@ class TechnicalIndicators:
         return df
 
       
-    def GetStochastic(self,high,low,close,prefix):
-        print "Calculating Sthocastic Indicator..."
+    def GetStochastic(self,high,low,close,prefix,supressMessage = True):
+        if not supressMessage:
+            print "Calculating Sthocastic Indicator..."
         slowk, slowd = talib.STOCH(high,low,close)
         values = [slowk,slowd]
         columns = [prefix+"SLOWK",prefix+"SLOWD"]
@@ -101,7 +102,7 @@ class TechnicalIndicators:
         dfs.append(self.GetMomentum(values,"Std",supressMessage))
         dfs.append( self.GetRSI(values,"Std",supressMessage))
         dfs.append(self.GetMACD(values,"Std",supressMessage))
-        dfs.append(self.GetStochastic(df['Norm_High'].values,df['Norm_Low'].values,values,"Std"))
+        dfs.append(self.GetStochastic(df['Norm_High'].values,df['Norm_Low'].values,values,"Std",supressMessage))
         #dfs.append(self.GetBollingerBands(values,10,1.9,"Short",supressMessage))
         dfs.append(self.GetBollingerBands(values,20,2,"Middle",supressMessage))
         #dfs.append(self.GetBollingerBands(values,50,2.1,"Long",supressMessage))

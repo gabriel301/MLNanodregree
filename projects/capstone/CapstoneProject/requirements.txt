@@ -1,0 +1,5 @@
+ta-lib==0.4.9
+pandas==0.20.1
+numpy==1.11.3
+scikit-learn==0.18.1 
+ 

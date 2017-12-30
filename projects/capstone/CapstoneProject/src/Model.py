@@ -9,10 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression,Ridge,HuberRegressor,Lasso,ElasticNet
-from sklearn.neighbors import KNeighborsRegressor
 from Util import Util
-from scipy import stats
-from sklearn.decomposition import PCA
 from TechinalIndicators import TechnicalIndicators
 
 class Model:
