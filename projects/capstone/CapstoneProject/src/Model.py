@@ -4,17 +4,17 @@ import numpy as np
 import math
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import ShuffleSplit
+from sklearn.model_selection import TimeSeriesSplit
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression,Ridge,HuberRegressor,Lasso,ElasticNet
 from Util import Util
 from TechinalIndicators import TechnicalIndicators
-
+import os 
 class Model:
   
-    def GetTrainPredictData(self,df,featureColumns,targetColumn,trainSize=0.8,recordsToPredict = 1):
+    def GetTrainPredictData(self,df,featureColumns,targetColumn,trainSize=0.9,recordsToPredict = 1):
        
         dfFeatures = df[featureColumns].shift(-recordsToPredict).dropna() ## Drops last row in order to predict the next price using the previous indicators
         dfTarget = df[targetColumn].shift(recordsToPredict).dropna() #Shift the dataset to "align" with feature datase
@@ -28,10 +28,12 @@ class Model:
     #Performs grid search for the chosen model
     def fit_model(self,model,params,X, y):
 
-        cv_sets = ShuffleSplit(n_splits = 10, test_size = 0.20, random_state = 0).get_n_splits(X.shape[0])
+        timeSeriesSplitObj = TimeSeriesSplit(n_splits=10)
+        #cv_sets = ShuffleSplit(n_splits = 10, test_size = 0.20, random_state = 0).get_n_splits(X.shape[0])
+        #cv_sets = TimeSeriesSplit(n_splits=10).get_n_splits(X.shape[0])
         scoring_fnc = make_scorer(r2_score)
 
-        grid = GridSearchCV(estimator=model,param_grid=params,scoring=scoring_fnc,cv=cv_sets)
+        grid = GridSearchCV(estimator=model,param_grid=params,scoring=scoring_fnc,cv=TimeSeriesSplit(n_splits=10))
 
         grid = grid.fit(X, y.ravel())
 
@@ -77,7 +79,7 @@ class Model:
         X_train, X_test, y_train, y_test = self.GetTrainPredictData(df.copy(),featureColumns,['Norm_Adjusted_Close'],0.8,recordsToPredict)
         dfResult['Actual'] = X_test['Adjusted_Close']
         dfResult['Date'] = X_test['Date']
-        featureColumns = featureColumns[10:]
+        featureColumns = featureColumns[11:]
         X_train = X_train[featureColumns]
         X_test = X_test[featureColumns]
         for key in models:
@@ -112,8 +114,8 @@ class Model:
             print "MSE Test Score {}".format(metrics['MSE Test Score'])
 
         if(writeInFile):
-            Util().WriteDataFrame(dfResult,outputfolder,str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
-            Util().WriteDataFrame(dfMetrics,outputfolder,"Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
+            Util().WriteDataFrame(dfResult,os.path.join(outputfolder,"Predictions",str(df["Ticker"][0])),str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")    
+            Util().WriteDataFrame(dfMetrics,os.path.join(outputfolder,"Benchmarks",str(df["Ticker"][0])),"Scores "+str(df["Ticker"][0])+" "+str(recordsToPredict)+" days"+".csv")
         return models, params
     
     def GetBestEstimatorNexDayStrategy(self,df,recordsToPredict=1,outputfolder="",writeInFile=True):
@@ -196,14 +198,14 @@ class Model:
         return reScaled[0]
 
 def main():
-    files = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\TesteDonwloader\Data\Historical\Indicators','csv')
+    files = Util().GetFilesFromFolder('C:\Users\Augus\Desktop\Data\Indicators\Normalized','csv')
     intervals = [1,7,15,30,60,120]
     for file in files:
         print "File: {}".format(file)
         df = pd.read_csv(file)
         for interval in intervals:
             #Model().GetBestEstimatorNexDayStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Next Day Strategy')
-            Model().GetBestEstimatorsShiftStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\TesteDonwloader\Data\Predictions\Shift Strategy')
+            Model().GetBestEstimatorsShiftStrategy(df.copy(),interval,'C:\Users\Augus\Desktop\Data\Only Normalized Indicators')
             
 
 
