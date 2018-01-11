@@ -52,9 +52,9 @@ def main():
                         default='./',
                         action='store',
                         nargs='?')
-    parser.add_argument('-m','--model', help='Which model use to predict values. Linear, ElasticNet (default), Ridge, Huber, Lasso'
-                        ,const='ElasticNet',
-                        default='ElasticNet',
+    parser.add_argument('-m','--model', help='Which model use to predict values. Linear, ElasticNet, Ridge, Huber, Lasso (default)'
+                        ,const='Lasso',
+                        default='Lasso',
                         action='store',
                         nargs='?')
 
